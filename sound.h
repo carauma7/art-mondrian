@@ -34,9 +34,11 @@
 #define AUDIO_BELLS             "audio/bells.mp3"
 #define AUDIO_SHOOT_FOOD        "audio/shoot-food.mp3"
 #define AUDIO_GOODBYE           "audio/goodbye.mp3"
+#define AUDIO_LEVELUP           "audio/levelup.mp3"
 
 extern unsigned long int audio_mainchannel;
 extern unsigned long int audio_effectchannel;
+extern unsigned long int audio_voicechannel;
 
 int audio_initialize(void);
 void audio_terminate(void);

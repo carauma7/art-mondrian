@@ -22,6 +22,9 @@ unsigned long int audio_mainchannel;
 /* Canal auxiliar para efeitos curtos sobre o áudio principal */
 unsigned long int audio_effectchannel;
 
+/* Canal reservado para vozes (ex: risada malévola), evita ser abafado por efeitos curtos */
+unsigned long int audio_voicechannel;
+
 /* Nome do último arquivo tocado no canal principal, usado por audio_is_track_playing */
 static char last_track[256] = "";
 

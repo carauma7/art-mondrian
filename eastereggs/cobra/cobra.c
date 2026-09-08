@@ -61,6 +61,12 @@ int key_is_arrow = 0;
 // Pontuação
 int score = 0;
 
+// Pontos necessários para subir de nível
+#define POINTS_PER_LEVEL 33
+
+// Nível atual
+int level = 1;
+
 // Direção do último movimento efetivo da cobra (usada para orientar o tiro)
 int last_moves[MAX_SNAKES];
 
@@ -99,6 +105,8 @@ void draw_head(void);
 void kill_active_snake(void);
 void draw_food(int food_idx);
 void new_food(int food_idx);
+static void draw_start_countdown(void);
+static void reset_round_for_new_level(void);
 
 // Cor da próxima célula do corpo, avançando a faixa
 static int next_body_color(void)
@@ -740,6 +748,68 @@ void draw_score(void)
     textcolor(WHITE);
 }
 
+// Desenha o nível atual, logo abaixo da pontuação
+void draw_level(void)
+{
+    textcolor(LIGHTGREEN);
+
+    arena_gotoxy(WIDTH / 2 + 15, HEIGHT - 14);
+
+    printf(
+        " Nivel\e[37;40m: \e[33;40m%d ",
+        level
+    );
+
+    textcolor(WHITE);
+}
+
+// Mostra "NIVEL x" bem centralizado na arena, aguarda e depois apaga.
+static void draw_level_banner(int lvl)
+{
+    char buf[32];
+    int visible_len;
+    int start_x;
+    int y;
+
+    snprintf(buf, sizeof(buf), "NIVEL %d", lvl);
+    visible_len = (int)strlen(buf);
+
+    start_x = (WIDTH - visible_len) / 2;
+    if (start_x < 1)
+    {
+        start_x = 1;
+    }
+
+    y = HEIGHT / 2;
+
+    textcolor(LIGHTGREEN);
+    arena_gotoxy(start_x, y);
+    printf("%s", buf);
+    textcolor(WHITE);
+    fflush(stdout);
+
+    delay(1500);
+
+    arena_gotoxy(start_x, y);
+    printf("%*s", visible_len, "");
+    fflush(stdout);
+}
+
+// Verifica se a pontuação atingiu o próximo nível. Se sim, pausa a
+// partida, toca o efeito sonoro e exibe o aviso antes de continuar.
+static void check_level_up(void)
+{
+    while (score >= level * POINTS_PER_LEVEL)
+    {
+        level++;
+
+        reset_round_for_new_level();
+        audio_play(&audio_effectchannel, AUDIO_LEVELUP, FALSE);
+        draw_level_banner(level);
+        draw_start_countdown();
+    }
+}
+
 // Escolhe o caractere do tiro de acordo com a direção
 static const char *bullet_char(int dir)
 {
@@ -899,6 +969,7 @@ int update_bullet(void)
         score += 3;
 
         draw_score();
+        check_level_up();
 
         bullet_active = 0;
         bullet_owner = ERR;
@@ -1087,6 +1158,7 @@ void make_move(int pbest_move)
 
         // A pontuação só muda aqui.
         draw_score();
+        check_level_up();
 
         // Cria novo alimento.
         if (total_snake_size() < (WIDTH - 2) * (HEIGHT - 2))
@@ -1345,6 +1417,9 @@ void initialize_game(void)
     // Pontuação
     score = 0;
 
+    // Nível
+    level = 1;
+
     // Tiro
     last_moves[0] = ERR;
     bullet_active = 0;
@@ -1359,6 +1434,140 @@ void initialize_game(void)
     {
         cell_color[i] = WHITE;
     }
+}
+
+// Apaga tudo que estiver desenhado dentro da borda da arena
+static void clear_arena_interior(void)
+{
+    int x;
+    int y;
+
+    for (y = 1; y < HEIGHT - 1; y++)
+    {
+        for (x = 1; x < WIDTH - 1; x++)
+        {
+            arena_gotoxy(x, y);
+            putstr(CHAR_EMPTY);
+        }
+    }
+}
+
+// Recomeça a rodada para o novo nível: todas as cobras vivas voltam a um
+// ponto de partida seguro (mantendo o tamanho conquistado) e o alimento
+// é sorteado em novos lugares, preservando pontuação e nível.
+static void reset_round_for_new_level(void)
+{
+    int i;
+    int j;
+    int w;
+    int h;
+    int pos;
+    int placed;
+    int attempts;
+
+    clear_arena_interior();
+
+    for (i = 0; i < FIELD_SIZE; i++)
+    {
+        board[i] = 0;
+    }
+
+    for (j = 0; j < MAX_SNAKES; j++)
+    {
+        last_moves[j] = ERR;
+    }
+
+    bullet_active = 0;
+    bullet_pos = ERR;
+    bullet_dir = ERR;
+    bullet_owner = ERR;
+
+    paint_step = 0;
+
+    for (i = 0; i < FIELD_SIZE; i++)
+    {
+        cell_color[i] = WHITE;
+    }
+
+    // A cobra principal sempre volta à posição inicial de largada,
+    // enrolada em um único ponto (o corpo se distribui ao se mover)
+    pos = 1 * WIDTH + 1;
+
+    for (i = 0; i < snake_sizes[0]; i++)
+    {
+        snakes[0][i] = pos;
+    }
+
+    // As demais cobras vivas (criadas com "C") também voltam,
+    // enroladas em um novo ponto livre, mantendo seu tamanho
+    for (j = 1; j < snake_count; j++)
+    {
+        if (!snake_alive[j])
+        {
+            continue;
+        }
+
+        placed = 0;
+
+        for (attempts = 0; attempts < FIELD_SIZE; attempts++)
+        {
+            w = 1 + rand() % (WIDTH - 2);
+            h = 1 + rand() % (HEIGHT - 2);
+            pos = h * WIDTH + w;
+
+            if (is_cell_free_all(pos))
+            {
+                placed = 1;
+                break;
+            }
+        }
+
+        if (!placed)
+        {
+            pos = 1 * WIDTH + 1;
+        }
+
+        for (i = 0; i < snake_sizes[j]; i++)
+        {
+            snakes[j][i] = pos;
+        }
+    }
+
+    active_snake_idx = 0;
+
+    // Um alimento novo para cada cobra viva, longe de todas elas
+    food_count = snake_count;
+
+    for (i = 0; i < food_count; i++)
+    {
+        new_food(i);
+    }
+
+    choose_target_food();
+
+    board_reset(
+        snake,
+        snake_size,
+        board
+    );
+
+    draw_border();
+
+    for (j = 0; j < snake_count; j++)
+    {
+        if (!snake_alive[j])
+        {
+            continue;
+        }
+
+        active_snake_idx = j;
+        draw_head();
+    }
+
+    active_snake_idx = 0;
+
+    draw_score();
+    draw_level();
 }
 
 // Verifica se o movimento leva a cabeça para fora da arena ou sobre o corpo.
@@ -1428,7 +1637,7 @@ void kill_active_snake(void)
 
     if (remaining_snakes > 0)
     {
-        audio_play(&audio_effectchannel, AUDIO_EVILLAUGH, FALSE);
+        audio_play(&audio_voicechannel, AUDIO_EVILLAUGH, FALSE);
     }
 
     if (food_count > remaining_snakes)
@@ -1727,12 +1936,16 @@ int cobraRun(void)
     // Pontuação
     draw_score();
 
+    // Nível
+    draw_level();
+
     // Modo de controle inicial.
     draw_control_mode(manual_mode, paused);
 
     audio_stop(); audio_resume();
     audio_play(&audio_mainchannel, AUDIO_MAP1, TRUE);
 
+    draw_level_banner(level);
     draw_start_countdown();
 
     // Loop principal do jogo
@@ -1897,10 +2110,10 @@ int cobraRun(void)
 
     if (snake_died)
     {
-        // Fundo (dead) no canal principal e voz (evil laugh) no canal de efeitos, tocando ao mesmo tempo
+        // Fundo (dead) no canal principal e voz (evil laugh) no canal de voz, tocando ao mesmo tempo
         audio_play(&audio_mainchannel, AUDIO_DEAD, FALSE);
         delay(500);
-        audio_play(&audio_effectchannel, AUDIO_EVILLAUGH, FALSE);
+        audio_play(&audio_voicechannel, AUDIO_EVILLAUGH, FALSE);
     }
     else
     {
