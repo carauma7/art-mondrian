@@ -136,7 +136,7 @@ bool balancedText(const char *text)
 
 void problem_5(void)
 {
-    draw_problem_screen(4,(const char *) ascii_problema_5);
+    draw_problem_screen(3,(const char *) ascii_problema_5);
     //----------------------------------------------------
 
     textcolor(WHITE); textbackground(BLACK);

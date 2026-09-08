@@ -135,7 +135,7 @@ bool isPalindrome(char word[])
 
 void problem_4(void)
 {
-    draw_problem_screen(4,(const char *) ascii_problem_4);
+    draw_problem_screen(3,(const char *) ascii_problem_4);
     //----------------------------------------------------
 
     textcolor(WHITE); textbackground(BLACK);

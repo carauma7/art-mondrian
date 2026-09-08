@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <conio.h>
 #include "cobra.h"
@@ -7,6 +8,7 @@
 #include "../../utils.h"
 #include "../../sound.h"
 #include "../../ascii/54321.h"
+#include "../../ascii/gameend.h"
 
 // Tabuleiro
 int board[FIELD_SIZE];
@@ -1576,12 +1578,100 @@ static void draw_start_countdown(void)
     fflush(stdout);
 }
 
-// Mensagem final, dentro da área do problema
+// Desenha a arte ASCII de fim de jogo no centro da arena em vermelho
+static void draw_end_game_ascii(void)
+{
+    const unsigned char *art = ascii_endGame;
+    unsigned int len = ascii_endGame_length;
+    int total_lines = 0;
+    unsigned int i;
+    int start_y;
+    int line;
+    const unsigned char *p;
+    unsigned int remaining;
+
+    if (len == 0)
+    {
+        return;
+    }
+
+    for (i = 0; i < len; i++)
+    {
+        if (art[i] == '\n')
+        {
+            total_lines++;
+        }
+    }
+    if (len > 0 && art[len - 1] != '\n')
+    {
+        total_lines++;
+    }
+
+    textcolor(RED);
+
+    start_y = (HEIGHT - total_lines) / 2;
+    if (start_y < 1)
+    {
+        start_y = 1;
+    }
+
+    line = 0;
+    p = art;
+    remaining = len;
+
+    while (remaining > 0 && line < total_lines)
+    {
+        int line_width = 0;
+        while ((unsigned int)line_width < remaining && p[line_width] != '\n')
+        {
+            line_width++;
+        }
+
+        int start_x = (WIDTH - line_width) / 2;
+        if (start_x < 1)
+        {
+            start_x = 1;
+        }
+
+        arena_gotoxy(start_x, start_y + line);
+        fwrite(p, 1, (size_t)line_width, stdout);
+
+        if ((unsigned int)line_width < remaining && p[line_width] == '\n')
+        {
+            p += line_width + 1;
+            remaining -= (line_width + 1);
+        }
+        else
+        {
+            p += line_width;
+            remaining -= line_width;
+        }
+        line++;
+    }
+
+    textcolor(WHITE);
+    fflush(stdout);
+}
+
+// Mensagem final, centralizada na parte inferior da arena
 static void draw_game_over(const char *message)
 {
+    char text_buf[128];
+    int visible_len;
+    int start_x;
+
+    snprintf(text_buf, sizeof(text_buf), "%s Pontuação final: %d ", message, score);
+    visible_len = (int)strlen(text_buf);
+
+    start_x = (WIDTH - visible_len) / 2;
+    if (start_x < 1)
+    {
+        start_x = 1;
+    }
+
     textcolor(LIGHTRED);
 
-    arena_gotoxy(WIDTH / 4 - 1, HEIGHT - 1);
+    arena_gotoxy(start_x, HEIGHT - 1);
 
     printf(
         "%s Pontuação final\e[37;40m:\e[31;40m \e[33;40m%d ",
@@ -1796,6 +1886,11 @@ int cobraRun(void)
         delay(60);
 
         fflush(stdout);
+    }
+
+    if (snake_died)
+    {
+        draw_end_game_ascii();
     }
 
     draw_game_over(message);

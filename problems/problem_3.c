@@ -100,7 +100,7 @@ void printFila3(Fila3 *f) {
 
 void problem_3(void)
 {
-    draw_problem_screen(3, (const char *) ascii_problem_3);
+    draw_problem_screen(2, (const char *) ascii_problem_3);
     //----------------------------------------------------
 
     textcolor(WHITE); textbackground(BLACK);

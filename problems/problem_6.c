@@ -139,7 +139,7 @@ int hotPotato(int n, int k) {
 
 void problem_6(void)
 {
-    draw_problem_screen(4,(const char *) ascii_problema_6);
+    draw_problem_screen(3,(const char *) ascii_problema_6);
     //----------------------------------------------------
 
     textcolor(WHITE); textbackground(BLACK);
