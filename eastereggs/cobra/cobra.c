@@ -41,6 +41,17 @@ int target_food = 3 * WIDTH + 3;
 
 #define food target_food
 
+// Obstáculos coloridos, adicionados gradualmente a cada nível.
+#define MAX_OBSTACLES 96
+#define MIN_OBSTACLE_DISTANCE 6
+#define MAX_MAZE_WIDTH 25
+#define MAX_MAZE_HEIGHT 9
+
+int obstacles[MAX_OBSTACLES];
+int obstacle_colors[MAX_OBSTACLES];
+int obstacle_count = 0;
+int maze_cells[FIELD_SIZE];
+
 // Melhor movimento
 int best_move = ERR;
 
@@ -90,7 +101,15 @@ static const int mondrian_palette[] = {
     LIGHTBLUE
 };
 
+static const int obstacle_palette[] = {
+    LIGHTRED,
+    YELLOW,
+    LIGHTBLUE,
+    WHITE
+};
+
 #define MONDRIAN_COLORS ( (int)( sizeof(mondrian_palette) / sizeof(mondrian_palette[0]) ) )
+#define OBSTACLE_COLORS ( (int)( sizeof(obstacle_palette) / sizeof(obstacle_palette[0]) ) )
 
 // Células pintadas com a mesma cor antes de trocar de faixa
 #define MONDRIAN_BAND 2
@@ -107,6 +126,19 @@ void draw_food(int food_idx);
 void new_food(int food_idx);
 static void draw_start_countdown(void);
 static void reset_round_for_new_level(void);
+static int obstacle_at(int idx);
+static int maze_at(int idx);
+static void draw_obstacle(int obstacle_idx);
+static void generate_level_obstacles(void);
+static int try_add_maze_block(int pos);
+static void carve_maze(
+    int maze[MAX_MAZE_HEIGHT][MAX_MAZE_WIDTH],
+    int maze_width,
+    int maze_height,
+    int x,
+    int y
+);
+int find_safe_way(void);
 
 // Cor da próxima célula do corpo, avançando a faixa
 static int next_body_color(void)
@@ -193,6 +225,26 @@ int is_cell_free_food_except(int idx, int ignored_food_idx)
     }
 
     return 1;
+}
+
+static int obstacle_at(int idx)
+{
+    int i;
+
+    for (i = 0; i < obstacle_count; i++)
+    {
+        if (obstacles[i] == idx)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static int maze_at(int idx)
+{
+    return maze_cells[idx] != 0;
 }
 
 int choose_target_food(void)
@@ -318,6 +370,11 @@ void board_reset(
     }
 
     pboard[food] = FOOD;
+
+    for (i = 0; i < obstacle_count; i++)
+    {
+        pboard[obstacles[i]] = SNAKE;
+    }
 
     for (j = 0; j < snake_count; j++)
     {
@@ -641,6 +698,16 @@ void draw_food(int food_idx)
     textcolor(WHITE);
 }
 
+static void draw_obstacle(int obstacle_idx)
+{
+    int pos = obstacles[obstacle_idx];
+
+    textcolor(obstacle_colors[obstacle_idx]);
+    arena_gotoxy(pos % WIDTH, pos / WIDTH);
+    putstr("■");
+    textcolor(WHITE);
+}
+
 // Cria um novo alimento em uma posição aleatória, 
 // garantindo que não esteja ocupada pela cobra
 void new_food(int food_idx)
@@ -668,11 +735,238 @@ void new_food(int food_idx)
         cell_free =
             is_cell_free_all(foods[food_idx]) &&
             is_cell_free_food_except(foods[food_idx], food_idx) &&
+            !obstacle_at(foods[food_idx]) &&
+            !maze_at(foods[food_idx]) &&
             (!bullet_active || foods[food_idx] != bullet_pos);
     }
 
     // Somente a nova posição é desenhada
     draw_food(food_idx);
+}
+
+static int obstacle_is_far_from_snakes(int pos)
+{
+    int i;
+
+    for (i = 0; i < snake_count; i++)
+    {
+        int distance;
+
+        if (!snake_alive[i])
+        {
+            continue;
+        }
+
+        distance =
+            abs(pos % WIDTH - snakes[i][HEAD] % WIDTH) +
+            abs(pos / WIDTH - snakes[i][HEAD] / WIDTH);
+
+        if (distance < MIN_OBSTACLE_DISTANCE)
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+static int all_snakes_can_reach_food(void)
+{
+    int previous_active_snake_idx = active_snake_idx;
+    int snake_idx;
+    int food_idx;
+    int reachable;
+
+    for (snake_idx = 0; snake_idx < snake_count; snake_idx++)
+    {
+        if (!snake_alive[snake_idx])
+        {
+            continue;
+        }
+
+        active_snake_idx = snake_idx;
+        reachable = 0;
+
+        for (food_idx = 0; food_idx < food_count; food_idx++)
+        {
+            board_reset(snake, snake_size, tmpboard);
+
+            if (board_refresh(foods[food_idx], snake, tmpboard))
+            {
+                reachable = 1;
+                break;
+            }
+        }
+
+        board_reset(snake, snake_size, board);
+        choose_target_food();
+
+        if (!reachable || find_safe_way() == ERR)
+        {
+            active_snake_idx = previous_active_snake_idx;
+            return 0;
+        }
+    }
+
+    active_snake_idx = previous_active_snake_idx;
+
+    return 1;
+}
+
+static int try_add_maze_block(int pos)
+{
+    if (
+        !is_cell_free_all(pos) ||
+        !is_cell_free_food(pos) ||
+        obstacle_at(pos) ||
+        (bullet_active && pos == bullet_pos) ||
+        !obstacle_is_far_from_snakes(pos)
+    )
+    {
+        return 0;
+    }
+
+    obstacles[obstacle_count] = pos;
+    obstacle_colors[obstacle_count] =
+        obstacle_palette[(level + obstacle_count / 3) % OBSTACLE_COLORS];
+    obstacle_count++;
+
+    if (!all_snakes_can_reach_food())
+    {
+        obstacle_count--;
+        return 0;
+    }
+
+    return 1;
+}
+
+static void carve_maze(
+    int maze[MAX_MAZE_HEIGHT][MAX_MAZE_WIDTH],
+    int maze_width,
+    int maze_height,
+    int x,
+    int y
+)
+{
+    int directions[4] = { LEFT, RIGHT, UP, DOWN };
+    int direction_idx;
+    int direction_swap;
+    int next_x;
+    int next_y;
+
+    maze[y][x] = 0;
+
+    for (direction_idx = 3; direction_idx > 0; direction_idx--)
+    {
+        direction_swap = rand() % (direction_idx + 1);
+        next_x = directions[direction_idx];
+        directions[direction_idx] = directions[direction_swap];
+        directions[direction_swap] = next_x;
+    }
+
+    for (direction_idx = 0; direction_idx < 4; direction_idx++)
+    {
+        next_x = x + (directions[direction_idx] == LEFT ? -2 :
+            directions[direction_idx] == RIGHT ? 2 : 0);
+        next_y = y + (directions[direction_idx] == UP ? -2 :
+            directions[direction_idx] == DOWN ? 2 : 0);
+
+        if (
+            next_x >= 0 && next_x < maze_width &&
+            next_y >= 0 && next_y < maze_height &&
+            maze[next_y][next_x] == 1
+        )
+        {
+            maze[(y + next_y) / 2][(x + next_x) / 2] = 0;
+            carve_maze(maze, maze_width, maze_height, next_x, next_y);
+        }
+    }
+}
+
+static void generate_level_obstacles(void)
+{
+    int maze[MAX_MAZE_HEIGHT][MAX_MAZE_WIDTH];
+    int maze_width = 9 + (level - 2) * 2;
+    int maze_height = 5 + (level - 2) * 2;
+    int attempts = 0;
+    int origin_x;
+    int origin_y;
+    int x;
+    int y;
+
+    if (maze_width > MAX_MAZE_WIDTH)
+    {
+        maze_width = MAX_MAZE_WIDTH;
+    }
+
+    if (maze_height > MAX_MAZE_HEIGHT)
+    {
+        maze_height = MAX_MAZE_HEIGHT;
+    }
+
+    // Tenta reposicionar o labirinto quando ele bloquear a rota segura.
+    while (attempts < 40)
+    {
+        attempts++;
+        obstacle_count = 0;
+        memset(maze_cells, 0, sizeof(maze_cells));
+        origin_x = 1 + rand() % (WIDTH - 2 - maze_width + 1);
+        origin_y = 1 + rand() % (HEIGHT - 2 - maze_height + 1);
+
+        for (y = 0; y < maze_height; y++)
+        {
+            for (x = 0; x < maze_width; x++)
+            {
+                maze[y][x] = 1;
+            }
+        }
+
+        carve_maze(maze, maze_width, maze_height, 0, 0);
+
+        for (y = 0; y < maze_height; y++)
+        {
+            for (x = 0; x < maze_width; x++)
+            {
+                maze_cells[(origin_y + y) * WIDTH + origin_x + x] = 1;
+            }
+        }
+
+        // A IA prioriza a sobrevivência e evita becos sem saída; portanto,
+        // alimentos ficam fora da área interna do maze.
+        for (x = 0; x < food_count; x++)
+        {
+            if (maze_at(foods[x]))
+            {
+                new_food(x);
+            }
+        }
+
+        for (y = 0; y < maze_height; y++)
+        {
+            for (x = 0; x < maze_width; x++)
+            {
+                if (maze[y][x] == 1 &&
+                    !try_add_maze_block((origin_y + y) * WIDTH + origin_x + x))
+                {
+                    obstacle_count = 0;
+                    break;
+                }
+            }
+
+            if (obstacle_count == 0)
+            {
+                memset(maze_cells, 0, sizeof(maze_cells));
+                break;
+            }
+        }
+
+        if (obstacle_count > 0)
+        {
+            return;
+        }
+    }
+
+    memset(maze_cells, 0, sizeof(maze_cells));
 }
 
 int create_random_snake(void)
@@ -706,6 +1000,7 @@ int create_random_snake(void)
 
         if (
             is_cell_free_food(pos) &&
+            !maze_at(pos) &&
             (!bullet_active || pos != bullet_pos) &&
             is_cell_free_all(pos)
         )
@@ -979,6 +1274,21 @@ int update_bullet(void)
             new_food(food_idx);
         }
 
+        active_snake_idx = previous_active_snake_idx;
+
+        return 0;
+    }
+
+    // Um obstáculo interrompe o tiro sem ser removido.
+    if (obstacle_at(next_pos))
+    {
+        if (was_drawn)
+        {
+            erase_bullet();
+        }
+
+        bullet_active = 0;
+        bullet_owner = ERR;
         active_snake_idx = previous_active_snake_idx;
 
         return 0;
@@ -1419,6 +1729,8 @@ void initialize_game(void)
 
     // Nível
     level = 1;
+    obstacle_count = 0;
+    memset(maze_cells, 0, sizeof(maze_cells));
 
     // Tiro
     last_moves[0] = ERR;
@@ -1543,6 +1855,8 @@ static void reset_round_for_new_level(void)
         new_food(i);
     }
 
+    generate_level_obstacles();
+
     choose_target_food();
 
     board_reset(
@@ -1552,6 +1866,11 @@ static void reset_round_for_new_level(void)
     );
 
     draw_border();
+
+    for (i = 0; i < obstacle_count; i++)
+    {
+        draw_obstacle(i);
+    }
 
     for (j = 0; j < snake_count; j++)
     {
@@ -1590,6 +1909,11 @@ static int is_move_fatal(int move)
 
     next_idx = snake[HEAD] + move;
     eating = food_at(next_idx) != ERR;
+
+    if (obstacle_at(next_idx))
+    {
+        return 1;
+    }
 
     for (i = 0; i < snake_count; i++)
     {
@@ -1782,6 +2106,11 @@ static void draw_start_countdown(void)
     {
         arena_gotoxy(WIDTH / 2 - 8, HEIGHT / 2 - 3 + value);
         printf("%-16s", "");
+    }
+
+    for (value = 0; value < obstacle_count; value++)
+    {
+        draw_obstacle(value);
     }
 
     fflush(stdout);
