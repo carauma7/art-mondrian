@@ -78,6 +78,53 @@ static bool devcalc_has_unknown_token(char *str)
     return false;
 }
 
+// Detecta operadores mal formados (soletrados em duplicidade, pendurados no início/fim,
+// parênteses vazios etc.) que o parser não valida e travam a diferenciação.
+static bool devcalc_has_bad_syntax(char *str)
+{
+    int i, len = strlen(str);
+
+    if (len == 0)
+    {
+        return true;
+    }
+    if (strchr("*/^", str[0]) != NULL)
+    {
+        return true; // não pode começar com um operador binário
+    }
+    if (strchr("+-*/^", str[len - 1]) != NULL)
+    {
+        return true; // não pode terminar com um operador pendurado
+    }
+
+    for (i = 0; i < len - 1; i++)
+    {
+        char c0 = str[i], c1 = str[i + 1];
+        bool op0 = strchr("+-*/^", c0) != NULL;
+        bool op1 = strchr("+-*/^", c1) != NULL;
+
+        // dois operadores seguidos só fazem sentido como "operador" + "sinal unário"
+        if (op0 && op1 && !((strchr("*/^", c0) != NULL) && (strchr("+-", c1) != NULL)))
+        {
+            return true;
+        }
+        if ((c0 == '(') && op1 && (strchr("+-", c1) == NULL))
+        {
+            return true; // "(" seguido de */^ não tem operando à esquerda
+        }
+        if ((c1 == ')') && op0)
+        {
+            return true; // operador pendurado antes do fechamento
+        }
+        if ((c0 == '(') && (c1 == ')'))
+        {
+            return true; // parênteses vazios
+        }
+    }
+
+    return false;
+}
+
 void devcalcRun(void)
 {
     char *m_func = (char *) malloc(sizeof(char) * MAX_CHAR);
@@ -128,6 +175,11 @@ void devcalcRun(void)
         {
             textcolor(RED);
             printf("Expressão não reconhecida.");
+        }
+        else if (devcalc_has_bad_syntax(m_func))
+        {
+            textcolor(RED);
+            printf("Expressão mal formada.");
         }
         else
         {
