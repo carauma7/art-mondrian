@@ -51,6 +51,8 @@ int obstacles[MAX_OBSTACLES];
 int obstacle_colors[MAX_OBSTACLES];
 int obstacle_count = 0;
 int maze_cells[FIELD_SIZE];
+int obstacle_color_phase = 0;
+int obstacle_color_ticks = 0;
 
 // Melhor movimento
 int best_move = ERR;
@@ -120,6 +122,22 @@ static int paint_step = 0;
 // Cor com que cada célula do corpo foi pintada
 static int cell_color[FIELD_SIZE];
 
+// Cada cobra virtual recebe uma identidade visual própria.
+static const int virtual_snake_palettes[][5] = {
+    { LIGHTCYAN, BLUE, LIGHTCYAN, WHITE, BLUE },
+    { LIGHTMAGENTA, MAGENTA, YELLOW, LIGHTMAGENTA, MAGENTA },
+    { LIGHTGREEN, GREEN, YELLOW, LIGHTGREEN, GREEN },
+    { YELLOW, BROWN, LIGHTRED, YELLOW, BROWN },
+    { LIGHTBLUE, BLUE, WHITE, LIGHTBLUE, BLUE },
+    { LIGHTRED, RED, YELLOW, LIGHTRED, RED },
+    { WHITE, LIGHTGREY, LIGHTCYAN, WHITE, LIGHTGREY }
+};
+
+#define VIRTUAL_SNAKE_PALETTES \
+    (int)(sizeof(virtual_snake_palettes) / sizeof(virtual_snake_palettes[0]))
+
+static int virtual_snake_phase = 0;
+
 void draw_head(void);
 void kill_active_snake(void);
 void draw_food(int food_idx);
@@ -129,6 +147,8 @@ static void reset_round_for_new_level(void);
 static int obstacle_at(int idx);
 static int maze_at(int idx);
 static void draw_obstacle(int obstacle_idx);
+static void animate_obstacle_colors(void);
+static void animate_virtual_snakes(void);
 static void generate_level_obstacles(void);
 static int try_add_maze_block(int pos);
 static void carve_maze(
@@ -151,6 +171,44 @@ static int next_body_color(void)
     paint_step++;
 
     return color;
+}
+
+static int virtual_snake_color(int snake_idx, int segment_idx)
+{
+    int palette_idx = (snake_idx - 1) % VIRTUAL_SNAKE_PALETTES;
+    int color_idx =
+        (virtual_snake_phase + segment_idx + snake_idx * 2) % 5;
+
+    return virtual_snake_palettes[palette_idx][color_idx];
+}
+
+static void animate_virtual_snakes(void)
+{
+    int snake_idx;
+    int segment_idx;
+
+    virtual_snake_phase = (virtual_snake_phase + 1) % 5;
+
+    for (snake_idx = 1; snake_idx < snake_count; snake_idx++)
+    {
+        if (!snake_alive[snake_idx])
+        {
+            continue;
+        }
+
+        for (segment_idx = 0;
+             segment_idx < snake_sizes[snake_idx];
+             segment_idx++)
+        {
+            int pos = snakes[snake_idx][segment_idx];
+
+            textcolor(virtual_snake_color(snake_idx, segment_idx));
+            arena_gotoxy(pos % WIDTH, pos / WIDTH);
+            putstr(segment_idx == HEAD ? CHAR_SNAKE_HEAD : CHAR_SNAKE_BODY);
+        }
+    }
+
+    textcolor(WHITE);
 }
 
 // Verifica se uma posição está livre (sem a cobra)
@@ -706,6 +764,28 @@ static void draw_obstacle(int obstacle_idx)
     arena_gotoxy(pos % WIDTH, pos / WIDTH);
     putstr("■");
     textcolor(WHITE);
+}
+
+static void animate_obstacle_colors(void)
+{
+    int i;
+
+    obstacle_color_ticks++;
+
+    if (obstacle_count == 0 || obstacle_color_ticks < 6)
+    {
+        return;
+    }
+
+    obstacle_color_ticks = 0;
+    obstacle_color_phase = (obstacle_color_phase + 1) % OBSTACLE_COLORS;
+
+    for (i = 0; i < obstacle_count; i++)
+    {
+        obstacle_colors[i] =
+            obstacle_palette[(obstacle_color_phase + i / 3) % OBSTACLE_COLORS];
+        draw_obstacle(i);
+    }
 }
 
 // Cria um novo alimento em uma posição aleatória, 
@@ -1388,7 +1468,11 @@ void draw_head(void)
 
     cell_color[p] = next_body_color();
 
-    textcolor(cell_color[p]);
+    textcolor(
+        active_snake_idx == 0 ?
+            cell_color[p] :
+            virtual_snake_color(active_snake_idx, HEAD)
+    );
 
     arena_gotoxy(
         p % WIDTH,
@@ -1428,7 +1512,11 @@ void make_move(int pbest_move)
     p = snake[HEAD];
 
     // A antiga cabeça vira corpo (a célula é apagada adiante se virar cauda).
-    textcolor(cell_color[old_head]);
+    textcolor(
+        active_snake_idx == 0 ?
+            cell_color[old_head] :
+            virtual_snake_color(active_snake_idx, 1)
+    );
 
     arena_gotoxy(
         old_head % WIDTH,
@@ -1440,7 +1528,11 @@ void make_move(int pbest_move)
     // Desenha SOMENTE a nova cabeça.
     cell_color[p] = next_body_color();
 
-    textcolor(cell_color[p]);
+    textcolor(
+        active_snake_idx == 0 ?
+            cell_color[p] :
+            virtual_snake_color(active_snake_idx, HEAD)
+    );
 
     arena_gotoxy(
         p % WIDTH,
@@ -1731,6 +1823,8 @@ void initialize_game(void)
     level = 1;
     obstacle_count = 0;
     memset(maze_cells, 0, sizeof(maze_cells));
+    obstacle_color_phase = 0;
+    obstacle_color_ticks = 0;
 
     // Tiro
     last_moves[0] = ERR;
@@ -1741,6 +1835,7 @@ void initialize_game(void)
 
     // Faixa de cor inicial
     paint_step = 0;
+    virtual_snake_phase = 0;
 
     for (i = 0; i < FIELD_SIZE; i++)
     {
@@ -1795,6 +1890,7 @@ static void reset_round_for_new_level(void)
     bullet_owner = ERR;
 
     paint_step = 0;
+    virtual_snake_phase = 0;
 
     for (i = 0; i < FIELD_SIZE; i++)
     {
@@ -2333,9 +2429,13 @@ int cobraRun(void)
 
         if (paused)
         {
+            animate_obstacle_colors();
+            animate_virtual_snakes();
             delay(60);
             continue;
         }
+
+        animate_obstacle_colors();
 
         // Avança o tiro em curso (usa as cobras ainda não movidas neste tick),
         // encerra o jogo se ele eliminar a última cobra.
@@ -2416,6 +2516,8 @@ int cobraRun(void)
         {
             break;
         }
+
+        animate_virtual_snakes();
 
         // Arena completamente preenchida
         if (total_snake_size() >= playable_cells)
