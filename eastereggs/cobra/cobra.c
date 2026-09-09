@@ -151,6 +151,9 @@ static void animate_obstacle_colors(void);
 static void animate_virtual_snakes(void);
 static void generate_level_obstacles(void);
 static int try_add_maze_block(int pos);
+int is_move_possible(int idx, int move);
+void board_reset(int *psnake, int psize, int *pboard);
+int board_refresh(int pfood, int *psnake, int *pboard);
 static void carve_maze(
     int maze[MAX_MAZE_HEIGHT][MAX_MAZE_WIDTH],
     int maze_width,
@@ -309,8 +312,12 @@ int choose_target_food(void)
 {
     int i;
     int best_food_idx = 0;
-    int best_distance = FIELD_SIZE;
+    int best_score = FIELD_SIZE * 2;
+    int fallback_distance = FIELD_SIZE;
     int distance;
+    int path_distance;
+    int safe_move;
+    int reachable;
     int head_x = snake[HEAD] % WIDTH;
     int head_y = snake[HEAD] / WIDTH;
 
@@ -320,9 +327,50 @@ int choose_target_food(void)
             abs(head_x - foods[i] % WIDTH) +
             abs(head_y - foods[i] / WIDTH);
 
-        if (distance < best_distance)
+        if (distance < fallback_distance)
         {
-            best_distance = distance;
+            fallback_distance = distance;
+            best_food_idx = i;
+        }
+
+        // A distância em linha reta não basta: a rota pode estar bloqueada
+        // ou deixar a cobra sem saída ao chegar ao alimento.
+        target_food = foods[i];
+        board_reset(snake, snake_size, board);
+        reachable = board_refresh(target_food, snake, board);
+
+        if (!reachable)
+        {
+            continue;
+        }
+
+        path_distance = SNAKE;
+
+        for (safe_move = 0; safe_move < 4; safe_move++)
+        {
+            int next_idx = snake[HEAD] + mov[safe_move];
+
+            if (
+                is_move_possible(snake[HEAD], mov[safe_move]) &&
+                board[next_idx] < path_distance
+            )
+            {
+                path_distance = board[next_idx];
+            }
+        }
+
+        if (path_distance >= SNAKE)
+        {
+            continue;
+        }
+
+        // A rota segura recebe prioridade; a distância desempata as opções.
+        safe_move = find_safe_way();
+        distance = path_distance + (safe_move == ERR ? FIELD_SIZE : 0);
+
+        if (distance < best_score)
+        {
+            best_score = distance;
             best_food_idx = i;
         }
     }
