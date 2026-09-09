@@ -142,27 +142,27 @@ void problem_4(void)
 
     char textInput[CAPACIDADE];
 
-    gotoxy(9, 12);
+    gotoxy(9, 10);
     printf("É ou não é um Palíndromo, meu bom?\n");
-    gotoxy(9, 13);
+    gotoxy(9, 11);
     printf("Digite 'sair' para encerrar.\n\n");
 
     while (1) {
-        gotoxy(9, 14);textcolor(YELLOW);
+        gotoxy(9, 13);textcolor(YELLOW);
         printf("Mande bala, qual a palavra?: ");textcolor(CYAN);
         if (fgets(textInput, sizeof(textInput), stdin) == NULL) break;
 
         textInput[strcspn(textInput, "\r\n")] = '\0';
 
         if (igualSemCaso(textInput, "sair")) {
-            gotoxy(9, 18);textcolor(LIGHTMAGENTA);
+            gotoxy(9, 17);textcolor(LIGHTMAGENTA);
             printf("Saindo...\n");
             break;
         }
 
         if (strlen(textInput) == 0) continue;
 
-        gotoxy(9, 16);
+        gotoxy(9, 15);
         if (isPalindrome(textInput)) {
             textcolor(GREEN);            
             printf("Resposta: \"%s\" é um palíndromo, meu bom.\n\n", textInput);
