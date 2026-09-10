@@ -143,13 +143,13 @@ void problem_5(void)
 
     char textInput[CAPACIDADE];
 
-    gotoxy(9, 12);
+    gotoxy(9, 11);
     printf("A parada tá balanceada?\n");
-    gotoxy(9, 13);
+    gotoxy(9, 12);
     printf("Digite 'sair' para encerrar.\n\n");
 
     while (1) {
-        gotoxy(9, 14);textcolor(YELLOW);
+        gotoxy(9, 13);textcolor(YELLOW);
         printf("Mande bala, qual a expressão, meu nobre?: ");textcolor(CYAN);
         if (fgets(textInput, sizeof(textInput), stdin) == NULL) break;
 
@@ -157,7 +157,7 @@ void problem_5(void)
         textInput[strcspn(textInput, "\r\n")] = '\0';
 
         if (strcmp(textInput, "sair") == 0) {
-            gotoxy(9, 18);textcolor(LIGHTMAGENTA);
+            gotoxy(9, 17);textcolor(LIGHTMAGENTA);
             printf("Saindo...\n");
             break;
         }
@@ -166,10 +166,10 @@ void problem_5(void)
 
         
         if (balancedText(textInput)) {
-            gotoxy(9, 16);textcolor(GREEN);            
+            gotoxy(9, 15);textcolor(GREEN);            
             printf("Resposta: \"%s\" está balanceado, meu bom.\n\n", textInput);
         } else {
-            gotoxy(9, 16);textcolor(RED);
+            gotoxy(9, 15);textcolor(RED);
             printf("Resposta: \"%s\" não está balanceado, meu bom.\n\n", textInput);
         }
         gotoxy(9, 14);printf("                                                   ");
