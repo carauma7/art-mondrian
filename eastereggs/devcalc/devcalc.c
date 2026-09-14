@@ -135,17 +135,17 @@ void devcalcRun(void)
 
     textbackground(BLACK);
     textcolor(CYAN);
-    gotoxy(DEVCALC_X, line);
-    printf("CALCULADORA DE DERIVADAS -- versão: 0.1");
+    gotoxy(DEVCALC_X, line);textcolor(LIGHTCYAN);
+    printf("CALCULADORA DE DERIVADAS - v0.1");
     line += 2;
-    gotoxy(DEVCALC_X, line);
-    printf("(?) Insira uma expressão e pressione ENTER.");
+    gotoxy(DEVCALC_X, line);textcolor(WHITE);
+    printf("Insira uma expressão e pressione ENTER.");
     line++;
-    gotoxy(DEVCALC_X, line);
-    printf("(?) Exemplo: ln(x) + cos(x^3) + x");
+    gotoxy(DEVCALC_X, line);textcolor(LIGHTRED);
+    printf("Por exemplo: ln(x) + cos(x^3) + x");
     line += 2;
-    gotoxy(DEVCALC_X, line);
-    printf("(?) Para finalizar, digite \"sair\".");
+    gotoxy(DEVCALC_X, line);textcolor(WHITE);
+    printf("Para finalizar, digite \"sair\".");
     line += 2;
 
     textcolor(GREEN);
