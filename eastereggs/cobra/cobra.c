@@ -2260,17 +2260,39 @@ static void draw_start_countdown(void)
     fflush(stdout);
 }
 
-// Desenha a arte ASCII de fim de jogo no centro da arena em vermelho
+static int mondrian_oscillating_color(int frame)
+{
+    int period;
+    int idx;
+
+    if (MONDRIAN_COLORS <= 1)
+    {
+        return RED;
+    }
+
+    period = (MONDRIAN_COLORS * 2) - 2;
+    idx = frame % period;
+
+    if (idx >= MONDRIAN_COLORS)
+    {
+        idx = period - idx;
+    }
+
+    return mondrian_palette[idx];
+}
+
+// Desenha a arte ASCII de fim de jogo no centro da arena,
+// piscando com as cores Mondrian da cobra.
 static void draw_end_game_ascii(void)
 {
     const unsigned char *art = ascii_endGame;
     unsigned int len = ascii_endGame_length;
     int total_lines = 0;
+    int frame;
+    int frame_count = 18;
+    int frame_delay_ms = 75;
     unsigned int i;
     int start_y;
-    int line;
-    const unsigned char *p;
-    unsigned int remaining;
 
     if (len == 0)
     {
@@ -2289,46 +2311,56 @@ static void draw_end_game_ascii(void)
         total_lines++;
     }
 
-    textcolor(RED);
-
     start_y = (HEIGHT - total_lines) / 2;
     if (start_y < 1)
     {
         start_y = 1;
     }
 
-    line = 0;
-    p = art;
-    remaining = len;
-
-    while (remaining > 0 && line < total_lines)
+    for (frame = 0; frame < frame_count; frame++)
     {
-        int line_width = 0;
-        while ((unsigned int)line_width < remaining && p[line_width] != '\n')
+        int line = 0;
+        const unsigned char *p = art;
+        unsigned int remaining = len;
+
+        textcolor(mondrian_oscillating_color(frame));
+
+        while (remaining > 0 && line < total_lines)
         {
-            line_width++;
+            int line_width = 0;
+
+            while ((unsigned int)line_width < remaining && p[line_width] != '\n')
+            {
+                line_width++;
+            }
+
+            {
+                int start_x = (WIDTH - line_width) / 2;
+                if (start_x < 1)
+                {
+                    start_x = 1;
+                }
+
+                arena_gotoxy(start_x, start_y + line);
+                fwrite(p, 1, (size_t)line_width, stdout);
+            }
+
+            if ((unsigned int)line_width < remaining && p[line_width] == '\n')
+            {
+                p += line_width + 1;
+                remaining -= (line_width + 1);
+            }
+            else
+            {
+                p += line_width;
+                remaining -= line_width;
+            }
+
+            line++;
         }
 
-        int start_x = (WIDTH - line_width) / 2;
-        if (start_x < 1)
-        {
-            start_x = 1;
-        }
-
-        arena_gotoxy(start_x, start_y + line);
-        fwrite(p, 1, (size_t)line_width, stdout);
-
-        if ((unsigned int)line_width < remaining && p[line_width] == '\n')
-        {
-            p += line_width + 1;
-            remaining -= (line_width + 1);
-        }
-        else
-        {
-            p += line_width;
-            remaining -= line_width;
-        }
-        line++;
+        fflush(stdout);
+        delay(frame_delay_ms);
     }
 
     textcolor(WHITE);
@@ -2418,7 +2450,7 @@ int cobraRun(void)
     audio_stop(); audio_resume();
     audio_play(&audio_mainchannel, AUDIO_MAP1, TRUE);
 
-    draw_level_banner(level);
+    if (level != 1) draw_level_banner(level);
     draw_start_countdown();
 
     // Loop principal do jogo
@@ -2582,22 +2614,17 @@ int cobraRun(void)
 
     if (snake_died)
     {
-        draw_end_game_ascii();
-    }
-
-    draw_game_over(message);
-
-    if (snake_died)
-    {
-        // Fundo (dead) no canal principal e voz (evil laugh) no canal de voz, tocando ao mesmo tempo
+        // Fundo (dead) e voz (evil laugh) começam junto com a animação visual.
         audio_play(&audio_mainchannel, AUDIO_DEAD, FALSE);
-        delay(500);
         audio_play(&audio_voicechannel, AUDIO_EVILLAUGH, FALSE);
+        draw_end_game_ascii();
     }
     else
     {
         audio_stop();
     }
+
+    draw_game_over(message);
 
     showcursor();
 
