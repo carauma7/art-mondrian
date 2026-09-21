@@ -40,7 +40,10 @@
 
 // Menu de opções
 #define MENU_MAIN_VISIBLE 10    // Número de opções visíveis no menu principal
-#define MENU_MAIN_ITEMS   14    // Número total de opções no menu principal
+#define MENU_MAIN_ITEMS   17    // Número total de opções no menu principal
+
+#define MENU_MAIN_DEVCALC 16
+#define MENU_MAIN_COBRA   17
 
 extern char *mainmenu[MENU_MAIN_ITEMS];
 

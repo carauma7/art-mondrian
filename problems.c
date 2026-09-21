@@ -37,10 +37,10 @@ void run_selected_problem(int selected)
         case 6:
             problem_6();
             break;
-        case 13:
+        case MENU_MAIN_DEVCALC:
             devcalcRun();
             break;
-        case 14:
+        case MENU_MAIN_COBRA:
             cobraRun();
             break;
         default:

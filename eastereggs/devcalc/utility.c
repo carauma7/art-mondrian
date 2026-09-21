@@ -158,7 +158,7 @@ fn_type id_fn_tp(char *str) {
         }
 
         pt = strpbrk(str_cpy, "lsct");
-        while (!par_paired(str_cpy, pt - str_cpy)) {
+        while (pt != NULL && !par_paired(str_cpy, pt - str_cpy)) {
             pt = strpbrk(pt + 1, "lsct");
         }
 

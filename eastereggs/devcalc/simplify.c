@@ -71,7 +71,7 @@ char *simp_input(char *str) {
                 temp_1 = simp_input(rev->entry);
             } else {
                 pt = strpbrk(temp_1, "^");
-                while (!par_paired(temp_1, pt - temp_1)) {
+                while (pt != NULL && !par_paired(temp_1, pt - temp_1)) {
                     pt = strpbrk(pt + 1, "^");
                 }
 

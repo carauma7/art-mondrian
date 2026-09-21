@@ -746,7 +746,7 @@ char *fn_diff(char *str) {
         }
 
         char *pt = strpbrk(str_cpy, "^");
-        while (!par_paired(str_cpy, pt - str_cpy)) {
+        while (pt != NULL && !par_paired(str_cpy, pt - str_cpy)) {
             pt = strpbrk(pt + 1, "^");
         }
 

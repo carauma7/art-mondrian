@@ -77,17 +77,20 @@ static void fb_flush(FrameBuf *fb)
 static void cloudy_sky_restore_cell(FrameBuf *fb, int x, int y);
 
 char *mainmenu[MENU_MAIN_ITEMS] = {
-	" Aula 01 | Núm. Total de Colisões ········· 21/08/26 ",  
-	" Aula 02 | Pilha ·························· 29/08/26 ",  
-    " ········└ Fila ···································┘ ",  
-    " Aula 03 | Palíndromo ····················· 05/09/26 ",  
-    " ········| Balanceamento ··························| ",  
-    " ········└ Problema de Josephus (Batata Quente) ···┘ ",
-    " ··················································· ",  
-    " ··················································· ",  
-    " ··················································· ",  
-    " ··················································· ",  
-    " ··················································· ",  
+	" Aula 01 · Núm. Total de Colisões ········· 21/08/26 ",  
+	" Aula 02 · Pilha ·························· 29/08/26 ",  
+    " └········ Fila ···································· ",  
+    " Aula 03 · Palíndromo ····················· 05/09/26 ",  
+    " |········ Balanceamento ··························· ",  
+    " └········ Problema de Josephus (Batata Quente) ···· ",
+    " Aula 04 · Lista Simplesmente Encadeada ··· 12/09/26 ",  
+    " Aula 05 · Exercícios · Questao 01 · Vazia  19/09/26 ",  
+    " |·········Sobre······· Questao 02 · Maior Valor ··· ",  
+    " |·········Listas······ Questao 03 · Concatenar ···· ",  
+    " |····················· Questao 04 · Comparar ······ ",  
+    " |····················· Questao 05 · Ausente ······· ",  
+    " |····················· Questao 06 · Coordenadas ··· ",                  
+    " └····················· Questão 07 · Inverter ······ ",  
     " ··················································· ",  
     " ·································D·E·R·I·V·A·D·A··· ",  
     " ·······································C·O·B·R·A··· ",
@@ -983,6 +986,10 @@ void draw_menu_items(int index, int selected)
         printf("%s", mainmenu[item_idx]);
     }
 
+    textcolor(WHITE);textbackground(BLACK);
+    gotoxy(16,9);printf(index > 1 ? "↑" : " ");
+    gotoxy(16,20);printf(index + MENU_MAIN_VISIBLE <= MENU_MAIN_ITEMS ? "↓" : " ");
+
     textcolor(WHITE);
     textbackground(BLACK);
     gotoxy(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -1136,7 +1143,7 @@ void draw_menu(void)
     //gotoxy(7, 24);    
 	//printf("\e[41m  \e[30;47m     Copyr\e[37;40mi\e[30;47mght 2026 \e[37;40m©\e[30;47m J. Caraumã • https://cara\e[37;40mu\e[30;47mma.com • Roraima");    
     gotoxy(12,25);textcolor(WHITE);textbackground(BLACK);
-    printf("Copyright 2026 © J. Caraumã • https://carauma.com • Roraima");
+    printf("Copyright 2026 © J. Caraumã • https://carauma.com • Roraima");    
     
     gotoxy(SCREEN_WIDTH, SCREEN_HEIGHT);    
 }

@@ -128,6 +128,7 @@ static bool devcalc_has_bad_syntax(char *str)
 void devcalcRun(void)
 {
     char *m_func = (char *) malloc(sizeof(char) * MAX_CHAR);
+    char *input_without_spaces;
     char *derv;
     int line = DEVCALC_Y_TOP;
 
@@ -152,9 +153,15 @@ void devcalcRun(void)
     gotoxy(DEVCALC_X, line);
     printf("Entrada: ");
     textcolor(WHITE);
-    fgets(m_func, MAX_CHAR, stdin);
-    m_func[strlen(m_func) - 1] = 0;
-    m_func = wo_space(m_func);
+    if (fgets(m_func, MAX_CHAR, stdin) == NULL)
+    {
+        free(m_func);
+        return;
+    }
+    m_func[strcspn(m_func, "\r\n")] = 0;
+    input_without_spaces = wo_space(m_func);
+    strcpy(m_func, input_without_spaces);
+    free(input_without_spaces);
 
     while (strcmp(m_func, "sair") != 0)
     {
@@ -219,9 +226,14 @@ void devcalcRun(void)
         gotoxy(DEVCALC_X, line);
         printf("Entrada: ");
         textcolor(WHITE);
-        fgets(m_func, MAX_CHAR, stdin);
-        m_func[strlen(m_func) - 1] = 0;
-        m_func = wo_space(m_func);
+        if (fgets(m_func, MAX_CHAR, stdin) == NULL)
+        {
+            break;
+        }
+        m_func[strcspn(m_func, "\r\n")] = 0;
+        input_without_spaces = wo_space(m_func);
+        strcpy(m_func, input_without_spaces);
+        free(input_without_spaces);
     }
 
     free(m_func);
