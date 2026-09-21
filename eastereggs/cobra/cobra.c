@@ -2471,6 +2471,7 @@ int cobraRun(void)
         if (!key_is_arrow && (key == 'p' || key == 'P'))
         {
             paused = !paused;
+            audio_play(&audio_effectchannel, AUDIO_PAUSE, FALSE);
             draw_control_mode(manual_mode, paused);
         }
         else if (key == 'a' || key == 'A')
