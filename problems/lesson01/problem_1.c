@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "../graphics.h"
-#include "../utils.h"
+#include "../../graphics.h"
+#include "../../utils.h"
 
 /*********************************************************************
 * PROBLEMA 1 - Crie um vetor com 5341 posições. Faça 2000 

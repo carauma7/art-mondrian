@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
-#include "../graphics.h"
-#include "../utils.h"
+#include "../../graphics.h"
+#include "../../utils.h"
 #include "problem_5.h"
 
 

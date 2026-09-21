@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "../graphics.h"
-#include "../utils.h"
+#include "../../graphics.h"
+#include "../../utils.h"
 #include "problem_2.h"
 
 /*

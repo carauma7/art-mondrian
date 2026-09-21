@@ -4,8 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "../graphics.h"
-#include "../utils.h"
+#include "../../graphics.h"
+#include "../../utils.h"
 #include "problem_4.h"
 
 /*
