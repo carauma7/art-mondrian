@@ -14,26 +14,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "main.h"
 #include "bass.h"
 
-/* Canal principal do dispositivo de áudio (áudios principais do jogo) */
+// Canal principal do dispositivo de áudio (áudios principais do jogo)
 unsigned long int audio_mainchannel;
 
-/* Canal auxiliar para efeitos curtos sobre o áudio principal */
+// Canal auxiliar para efeitos curtos sobre o áudio principal
 unsigned long int audio_effectchannel;
 
-/* Canal reservado para vozes (ex: risada malévola), evita ser abafado por efeitos curtos */
+// Canal reservado para vozes (ex: risada malévola), evita ser abafado por efeitos curtos
 unsigned long int audio_voicechannel;
 
-/* Nome do último arquivo tocado no canal principal, usado por audio_is_track_playing */
+// Nome do último arquivo tocado no canal principal, usado por audio_is_track_playing
 static char last_track[256] = "";
 
-/* Reproduz o áudio correspondente ao arquivo dado, atualizando *audiochannel
- * com o handle do novo stream (senão o handle antigo é perdido e o canal
- * não pode mais ser parado/reutilizado pelo chamador) */
-int audio_play(unsigned long int *audiochannel, char *filename,
-	short repeat)
+// Reproduz o áudio correspondente ao arquivo dado, atualizando *audiochannel
+// com o handle do novo stream (senão o handle antigo é perdido e o canal
+// não pode mais ser parado/reutilizado pelo chamador)
+int audio_play(unsigned long int *audiochannel, char *filename, short repeat) 
 {
+	#ifdef SOUND_OFF
+		(void) audiochannel;
+		(void) filename;
+		(void) repeat;
+		return(EXIT_SUCCESS);
+	#endif
+	
 	unsigned long int new_channel;
 
 	BASS_ChannelStop(*audiochannel);
@@ -55,35 +62,58 @@ int audio_play(unsigned long int *audiochannel, char *filename,
 		BASS_ChannelPlay(*audiochannel, FALSE);
 	}
 	return(EXIT_SUCCESS);
+
 }
 
-/* Desabilita reprodução de áudio */
-void audio_stop(void)
+// Desabilita reprodução de áudio
+void audio_stop(void) 
 {
+	#ifdef SOUND_OFF
+		return;
+	#endif
+
 	BASS_Stop();
 }
 
-/* Indica se o canal ainda está tocando (útil para esperar um áudio terminar) */
-int audio_is_playing(unsigned long int audiochannel)
+// Indica se o canal ainda está tocando (útil para esperar um áudio terminar)
+int audio_is_playing(unsigned long int audiochannel) 
 {
+	#ifdef SOUND_OFF
+		(void) audiochannel;
+		return(FALSE);
+	#endif
+
 	return(BASS_ChannelIsActive(audiochannel) == BASS_ACTIVE_PLAYING);
 }
 
-/* Indica se o arquivo dado é o que está tocando agora no canal principal */
+// Indica se o arquivo dado é o que está tocando agora no canal principal
 int audio_is_track_playing(const char *filename)
 {
+	#ifdef SOUND_OFF
+		(void) filename;
+		return(FALSE);
+	#endif
+
 	return(audio_is_playing(audio_mainchannel) && strcmp(last_track, filename) == 0);
 }
 
-/* Habilita reprodução de áudio */
+// Habilita reprodução de áudio
 void audio_resume(void)
 {
+	#ifdef SOUND_OFF
+		return;
+	#endif
+
 	BASS_Start();
 }
 
-/* Inicializa o módulo de áudio com as configurações padrão */
+// Inicializa o módulo de áudio com as configurações padrão
 int audio_initialize(void)
 {
+	#ifdef SOUND_OFF
+		return(BASS_OK);
+	#endif
+
 	// Verifica se foi carregada uma versão correta da biblioteca BASS
 	if (HIWORD(BASS_GetVersion()) != BASSVERSION)
 	{
@@ -97,8 +127,12 @@ int audio_initialize(void)
 	return(BASS_OK);
 }
 
-/* Finaliza o módulo de áudio corretamente */
+// Finaliza o módulo de áudio corretamente
 void audio_terminate(void)
 {
+	#ifdef SOUND_OFF
+		return;
+	#endif
+
 	BASS_Free();
 }

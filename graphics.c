@@ -77,23 +77,23 @@ static void fb_flush(FrameBuf *fb)
 static void cloudy_sky_restore_cell(FrameBuf *fb, int x, int y);
 
 char *mainmenu[MENU_MAIN_ITEMS] = {
-	" Aula 01 · Núm. Total de Colisões ········· 21/08/26 ",  
-	" Aula 02 · Pilha ·························· 29/08/26 ",  
-    "         └ Fila ···························          ",  
-    " Aula 03 · Palíndromo ····················· 05/09/26 ",  
-    "         | Balanceamento ··················          ",  
-    "         └ Problema de Josephus (Batata Quente)      ",
-    " Aula 04 · Lista Simplesmente Encadeada ··· 12/09/26 ",  
-    " Aula 05 · Exercícios · Questao 01 · Vazia  19/09/26 ",  
-    "         |·Sobre······· Questao 02 · Maior Valor     ",  
-    "         |·Listas······ Questao 03 · Concatenar      ",  
-    "         |············· Questao 04 · Comparar        ",  
-    "         |············· Questao 05 · Ausente         ",  
-    "         |············· Questao 06 · Coordenadas     ",                  
-    "         └············· Questão 07 · Inverter        ",  
-    " ··················································· ",  
-    " · Surpresa: Calculadora de Derivadas ·············· ",  
-    " · Surpresa: Jogo da Cobrinha ······················ ",
+	" Aula 01 · Núm. Total de Colisões ········· 21/08/26 ",  // Número total de colisões 
+	" Aula 02 · Pilha ·························· 29/08/26 ",  // Pilha
+    "         └ Fila ···························          ",  // Fila
+    " Aula 03 · Palíndromo ····················· 05/09/26 ",  // Palíndromo
+    "         | Balanceamento ··················          ",  // Balanceamento
+    "         └ Problema de Josephus (Batata Quente)      ",  // Problema de Josephus
+    " Aula 04 · Lista Simplesmente Encadeada ··· 12/09/26 ",  // Lista Simplesmente Encadeada
+    " Aula 05 · Exercícios · Questao 01 · Vazia  19/09/26 ",  // Exercícios - Questão 01 - Lista vazia
+    "         |·Sobre······· Questao 02 · Maior Valor     ",  // Exercícios - Questão 02 - Maior Valor
+    "         |·Listas······ Questao 03 · Concatenar      ",  // Exercícios - Questão 03 - Concatenar
+    "         |············· Questao 04 · Comparar        ",  // Exercícios - Questão 04 - Comparar
+    "         |············· Questao 05 · Ausente         ",  // Exercícios - Questão 05 - Ausente
+    "         |············· Questao 06 · Coordenadas     ",  // Exercícios - Questão 06 - Coordenadas
+    "         └············· Questão 07 · Inverter        ",  // Exercícios - Questão 07 - Inverter
+    " ··················································· ",  // Separador
+    " · Surpresa: Calculadora de Derivadas ·············· ",  // Surpresa: Calculadora de Derivadas
+    " · Surpresa: Jogo da Cobrinha ······················ ",  // Surpresa: Jogo da Cobrinha
 };
 
 /*
