@@ -49,16 +49,16 @@ int getch(void)
 
     if (key == 0 || key == 224) {
         key = _getch();
-        if (key == 72) {
+        if (key == 72) {        // seta para cima
             pending_first = 91;
             pending_second = 65;
-        } else if (key == 80) {
+        } else if (key == 80) { // seta para baixo
             pending_first = 91;
             pending_second = 66;        
-        } else if (key == 77) {
+        } else if (key == 77) { // seta para direita
             pending_first = 91;
             pending_second = 67;
-        } else if (key == 75) {
+        } else if (key == 75) { // seta para esquerda
             pending_first = 91;
             pending_second = 68;
         } else {
@@ -80,10 +80,10 @@ KEY getKeypressed(void)
         int ext = _getch();
         switch (ext)
         {
-            case 72: tmp.x = 27; tmp.y = 91; tmp.z = 65; break; // Up arrow
-            case 80: tmp.x = 27; tmp.y = 91; tmp.z = 66; break; // Down arrow
-            case 77: tmp.x = 27; tmp.y = 91; tmp.z = 67; break; // Right arrow
-            case 75: tmp.x = 27; tmp.y = 91; tmp.z = 68; break; // Left arrow
+            case 72: tmp.x = 27; tmp.y = 91; tmp.z = 65; break; // Seta para cima
+            case 80: tmp.x = 27; tmp.y = 91; tmp.z = 66; break; // Seta para baixo
+            case 77: tmp.x = 27; tmp.y = 91; tmp.z = 67; break; // Seta para direita
+            case 75: tmp.x = 27; tmp.y = 91; tmp.z = 68; break; // Seta para esquerda
             default: tmp.x = ch; tmp.y = ext; break;
         }
     }
@@ -95,32 +95,30 @@ KEY getKeypressed(void)
     return tmp;
 }   
 
-/*
-* Função para aguardar até que o usuário pressione a tecla ESC ou Ctrl+X.
-* @return: Retorna 1 quando a tecla ESC ou Ctrl+X for pressionada.
-*/
+// Função para aguardar até que o usuário pressione a tecla ESC.
 int waitEsc(void)
-{    
-    textcolor(YELLOW);textbackground(BLACK);
+{        
     gotoxy(9, 21);
+    textcolor(YELLOW);textbackground(BLACK);
     printf("Pressione ESC para voltar ao menu...                            ");
     gotoxy(45, 21);
     int ch = 0;
-
     do
     {
         ch = _getch();
 
-        if (ch == 0 || ch == 224)
+        if ( ch == 0 || ch == 224 )
         {
             _getch();
+
             ch = 0;
         }
-    } while (ch != 27);
+    } while ( ch != 27 );
 
     return (1);
 }
 
+// Função para verificar se há teclas pressionadas disponíveis no buffer.
 int keypressed_available(void)
 {
     return _kbhit() != 0;
