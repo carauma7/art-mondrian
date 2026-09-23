@@ -1227,6 +1227,7 @@ static void check_level_up(void)
         level++;
 
         reset_round_for_new_level();
+        audio_play_map(level);
         audio_play(&audio_effectchannel, AUDIO_LEVELUP, FALSE);
         draw_level_banner(level);
         draw_start_countdown();
@@ -2448,7 +2449,7 @@ int cobraRun(void)
     draw_control_mode(manual_mode, paused);
 
     audio_stop(); audio_resume();
-    audio_play(&audio_mainchannel, AUDIO_MAP1, TRUE);
+    audio_play_map(level);
 
     if (level != 1) draw_level_banner(level);
     draw_start_countdown();

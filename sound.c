@@ -15,6 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
+#include "sound.h"
+#include "utils.h"
 #include "bass.h"
 
 // Canal principal do dispositivo de áudio (áudios principais do jogo)
@@ -28,6 +30,29 @@ unsigned long int audio_voicechannel;
 
 // Nome do último arquivo tocado no canal principal, usado por audio_is_track_playing
 static char last_track[256] = "";
+
+#define MAP_TRACK_COUNT 10
+#define MAP_FADE_STEPS 8
+#define MAP_FADE_STEP_MS 25
+
+static char *map_tracks[MAP_TRACK_COUNT] = {
+	AUDIO_MAP1, AUDIO_MAP2, AUDIO_MAP3, AUDIO_MAP4, AUDIO_MAP5,
+	AUDIO_MAP6, AUDIO_MAP7, AUDIO_MAP8, AUDIO_MAP9, AUDIO_MAP10
+};
+
+static void audio_fade_volume(unsigned long int channel, float from, float to)
+{
+	int step;
+
+	for (step = 1; step <= MAP_FADE_STEPS; step++)
+	{
+		float progress = (float) step / MAP_FADE_STEPS;
+		float volume = from + (to - from) * progress;
+
+		BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, volume);
+		delay(MAP_FADE_STEP_MS);
+	}
+}
 
 // Reproduz o áudio correspondente ao arquivo dado, atualizando *audiochannel
 // com o handle do novo stream (senão o handle antigo é perdido e o canal
@@ -63,6 +88,32 @@ int audio_play(unsigned long int *audiochannel, char *filename, short repeat)
 	}
 	return(EXIT_SUCCESS);
 
+}
+
+// Troca a música do mapa com uma transição suave e repete as dez faixas.
+int audio_play_map(int level)
+{
+	int track_index = (level - 1) % MAP_TRACK_COUNT;
+
+	#ifdef SOUND_OFF
+		(void) track_index;
+		return(EXIT_SUCCESS);
+	#endif
+
+	if (audio_mainchannel)
+	{
+		audio_fade_volume(audio_mainchannel, 1.0f, 0.0f);
+	}
+
+	if (audio_play(&audio_mainchannel, map_tracks[track_index], TRUE) != EXIT_SUCCESS)
+	{
+		return(EXIT_FAILURE);
+	}
+
+	BASS_ChannelSetAttribute(audio_mainchannel, BASS_ATTRIB_VOL, 0.0f);
+	audio_fade_volume(audio_mainchannel, 0.0f, 1.0f);
+
+	return(EXIT_SUCCESS);
 }
 
 // Desabilita reprodução de áudio
