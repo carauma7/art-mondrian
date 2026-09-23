@@ -39,6 +39,7 @@ int getch(void);
  * @return Estrutura KEY contendo os estados das teclas.
  */
 KEY getKeypressed(void);
+int keypressed_available(void);
 
 /**
  * Aguarda até que o usuário pressione a tecla ESC ou Ctrl+X.

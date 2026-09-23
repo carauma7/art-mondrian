@@ -40,6 +40,13 @@
    // Rotina principal
    while (WE_ARE_ALIVE)
    {
+      if (!keypressed_available())
+      {
+         draw_menu_items(MenuIndex, MenuSelected);
+         delay(80);
+         continue;
+      }
+
       keypressed = getKeypressed();
 
       // Pressionou setas direcionais

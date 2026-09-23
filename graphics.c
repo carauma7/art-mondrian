@@ -76,24 +76,24 @@ static void fb_flush(FrameBuf *fb)
 // Repinta uma célula do fundo de céu nublado (definida mais abaixo no arquivo)
 static void cloudy_sky_restore_cell(FrameBuf *fb, int x, int y);
 
-char *mainmenu[MENU_MAIN_ITEMS] = {
-	" Aula 01 · Núm. Total de Colisões ········· 21/08/26 ",  // Número total de colisões 
-	" Aula 02 · Pilha ·························· 29/08/26 ",  // Pilha
-    "         └ Fila ···························          ",  // Fila
-    " Aula 03 · Palíndromo ····················· 05/09/26 ",  // Palíndromo
-    "         | Balanceamento ··················          ",  // Balanceamento
-    "         └ Problema de Josephus (Batata Quente)      ",  // Problema de Josephus
-    " Aula 04 · Lista Simplesmente Encadeada ··· 12/09/26 ",  // Lista Simplesmente Encadeada
-    " Aula 05 · Exercícios · Questao 01 · Vazia  19/09/26 ",  // Exercícios - Questão 01 - Lista vazia
-    "         |·Sobre······· Questao 02 · Maior Valor     ",  // Exercícios - Questão 02 - Maior Valor
-    "         |·Listas······ Questao 03 · Concatenar      ",  // Exercícios - Questão 03 - Concatenar
-    "         |············· Questao 04 · Comparar        ",  // Exercícios - Questão 04 - Comparar
-    "         |············· Questao 05 · Ausente         ",  // Exercícios - Questão 05 - Ausente
-    "         |············· Questao 06 · Coordenadas     ",  // Exercícios - Questão 06 - Coordenadas
-    "         └············· Questão 07 · Inverter        ",  // Exercícios - Questão 07 - Inverter
-    " ··················································· ",  // Separador
-    " · Surpresa: Calculadora de Derivadas ·············· ",  // Surpresa: Calculadora de Derivadas
-    " · Surpresa: Jogo da Cobrinha ······················ ",  // Surpresa: Jogo da Cobrinha
+MenuItem menu_items[MENU_MAIN_ITEMS] = {
+        {" Aula 01 ·", "Núm. Total de Colisões ··········", "21/08/26"},
+        {" Aula 02 ·", "Pilha ···························", "29/08/26"},
+        {"         └", "Fila ····························", ""},
+        {" Aula 03 ·", "Palíndromo ······················", "05/09/26"},
+        {"         |", "Balanceamento ···················", ""},
+        {"         └", "Problema de Josephus (Batata Quente)", ""},
+        {" Aula 04 ·", "Lista Simplesmente Encadeada ····", "12/09/26"},
+        {" Aula 05 ·", "Exercícios · Questão 01 · Lista Vazia ·", "19/09/26"},
+        {"         |", "Exercícios · Questão 02 · Maior Valor ·", ""},
+        {"         |", "Exercícios · Questão 03 · Concatenar Listas ·", ""},
+        {"         |", "Exercícios · Questão 04 · Comparar Listas ·", ""},
+        {"         |", "Exercícios · Questão 05 · Ausente ·", ""},
+        {"         |", "Exercícios · Questão 06 · Coordenadas ·", ""},
+        {"         └", "Exercícios · Questão 07 · Inverter ·", ""},
+        {"", "", ""},
+        {" ·", "Surpresa: Calculadora de Derivadas", ""},
+        {" ·", "Surpresa: Jogo da Cobrinha", ""},
 };
 
 /*
@@ -944,9 +944,59 @@ int draw_turndownforwhat(void)
  * @param index: Índice do item do menu.
  * @param selected: Indica se o item está selecionado (1) ou não (0).
  */
+static void draw_menu_title(int x, int y, const char *title, int selected, size_t *scroll_offset)
+{
+    int total_bytes = (int) strlen(title);
+    int offsets[total_bytes + 1];
+    int total_chars = get_utf8_offsets(title, offsets);
+    int i;
+
+    gotoxy(x, y);
+    if (total_chars == 0)
+    {
+        for (i = 0; i < MENU_TITLE_WIDTH; i++) putchar(' ');
+        return;
+    }
+
+    if (selected && total_chars > MENU_TITLE_WIDTH)
+    {
+        int cycle_length = total_chars + 4;
+        for (i = 0; i < MENU_TITLE_WIDTH; i++)
+        {
+            int char_index = (int) ((*scroll_offset + (size_t) i) % (size_t) cycle_length);
+            if (char_index < total_chars)
+            {
+                int byte_start = offsets[char_index];
+                int byte_length = offsets[char_index + 1] - byte_start;
+                printf("%.*s", byte_length, title + byte_start);
+            }
+            else
+            {
+                putchar(' ');
+            }
+        }
+        (*scroll_offset)++;
+    }
+    else
+    {
+        int visible_chars = total_chars < MENU_TITLE_WIDTH ? total_chars : MENU_TITLE_WIDTH;
+        int visible_bytes = offsets[visible_chars] - offsets[0];
+        printf("%.*s", visible_bytes, title);
+        for (i = visible_chars; i < MENU_TITLE_WIDTH; i++) putchar(' ');
+    }
+}
+
 void draw_menu_items(int index, int selected)
 {
     int k;
+    static int previous_selected = 0;
+    static size_t scroll_offset = 0;
+
+    if (selected != previous_selected)
+    {
+        scroll_offset = 0;
+        previous_selected = selected;
+    }
 
     int max_index = MENU_MAIN_ITEMS - MENU_MAIN_VISIBLE + 1;
     if (max_index < 1) max_index = 1;
@@ -960,6 +1010,7 @@ void draw_menu_items(int index, int selected)
         if (item_idx >= MENU_MAIN_ITEMS) break;
 
         int item_num = item_idx + 1;
+        MenuItem *item = &menu_items[item_idx];
 
         gotoxy(15, 10 + k);
         if (selected == item_num)
@@ -983,7 +1034,10 @@ void draw_menu_items(int index, int selected)
             textbackground(BLACK);            
             textcolor(WHITE);
         }
-        printf("%s", mainmenu[item_idx]);
+        printf("%-10s", item->lesson);
+        draw_menu_title(25, 10 + k, item->title, selected == item_num, &scroll_offset);
+        gotoxy(58, 10 + k);
+        printf("%-10s", item->date);
     }
 
     textcolor(WHITE);textbackground(BLACK);

@@ -120,3 +120,8 @@ int waitEsc(void)
 
     return (1);
 }
+
+int keypressed_available(void)
+{
+    return _kbhit() != 0;
+}
