@@ -2627,8 +2627,6 @@ int cobraRun(void)
 
     draw_game_over(message);
 
-    showcursor();
-
     waitEsc();
 
     audio_terminate();
