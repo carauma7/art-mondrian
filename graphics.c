@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200809L
+#define _POSIX_C_SOURCE 200809L // Required for POSIX functions like clock_gettime()
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +27,7 @@ typedef struct FrameBuf
     size_t cap;
 } FrameBuf;
 
+// Funções auxiliares para manipulação do buffer de quadros (FrameBuf)
 static void fb_reserve(FrameBuf *fb, size_t cap)
 {
     fb->buf = (char *) malloc(cap);
@@ -34,6 +35,7 @@ static void fb_reserve(FrameBuf *fb, size_t cap)
     fb->cap = cap;
 }
 
+// Adiciona uma string formatada ao buffer de quadros (FrameBuf)
 static void fb_append(FrameBuf *fb, const char *fmt, ...)
 {
     if (fb->len >= fb->cap) return;
@@ -44,6 +46,7 @@ static void fb_append(FrameBuf *fb, const char *fmt, ...)
     if (n > 0) fb->len += (size_t) n;
 }
 
+// Adiciona bytes brutos ao buffer de quadros (FrameBuf)
 static void fb_putbytes(FrameBuf *fb, const char *bytes, size_t n)
 {
     if (fb->len + n > fb->cap) return;
@@ -51,21 +54,25 @@ static void fb_putbytes(FrameBuf *fb, const char *bytes, size_t n)
     fb->len += n;
 }
 
+// Move o cursor para a posição (x, y) no buffer de quadros (FrameBuf)
 static void fb_gotoxy(FrameBuf *fb, int x, int y)
 {
     fb_append(fb, "\e[%d;%dH", y, x);
 }
 
+// Define a cor do texto no buffer de quadros (FrameBuf)
 static void fb_textcolor(FrameBuf *fb, int color)
 {
     fb_append(fb, "\e[%d;%dm", (color & 0x10) ? 1 : 0, (color & 0xF) + 30);
 }
 
+// Define a cor de fundo do texto no buffer de quadros (FrameBuf)
 static void fb_textbackground(FrameBuf *fb, int color)
 {
     fb_append(fb, "\e[%d;%dm", (color & 0x10) ? 1 : 0, (color & 0xF) + 40);
 }
 
+// Envia o conteúdo do buffer de quadros (FrameBuf) para o terminal e limpa o buffer
 static void fb_flush(FrameBuf *fb)
 {
     fwrite(fb->buf, 1, fb->len, stdout);
@@ -76,25 +83,8 @@ static void fb_flush(FrameBuf *fb)
 // Repinta uma célula do fundo de céu nublado (definida mais abaixo no arquivo)
 static void cloudy_sky_restore_cell(FrameBuf *fb, int x, int y);
 
-MenuItem menu_items[MENU_MAIN_ITEMS] = {
-        {" Aula 01 ·", " Núm. Total de Colisões ··········", "21/08/26"},
-        {" Aula 02 ·", " Pilha ···························", "29/08/26"},
-        {"         ·", " Fila ····························", ""},
-        {" Aula 03 ·", " Palíndromo ······················", "05/09/26"},
-        {"         ·", " Balanceamento ···················", ""},
-        {"         ·", " Problema de Josephus (Batata Quente)", ""},
-        {" Aula 04 ·", " Lista Simplesmente Encadeada ····", "12/09/26"},
-        {" Aula 05 ·", " Exercícios · Questão 01 · Lista Vazia ·", "19/09/26"},
-        {"         ·", " Exercícios · Questão 02 · Maior Valor ·", ""},
-        {"         ·", " Exercícios · Questão 03 · Concatenar Listas ·", ""},
-        {"         ·", " Exercícios · Questão 04 · Comparar Listas ·", ""},
-        {"         ·", " Exercícios · Questão 05 · Ausente ·", ""},
-        {"         ·", " Exercícios · Questão 06 · Coordenadas ·", ""},
-        {"         ·", " Exercícios · Questão 07 · Inverter ·", ""},
-        {"", "", ""},
-        {" ·", "Surpresa: Calculadora de Derivadas", ""},
-        {" ·", "Surpresa: Jogo da Cobrinha", ""},
-};
+MenuItem menu_items[MENU_MAIN_CAPACITY];
+int menu_item_count = 0;
 
 /*
  * Função para exibir texto rolando no console.
@@ -998,7 +988,7 @@ void draw_menu_items(int index, int selected)
         previous_selected = selected;
     }
 
-    int max_index = MENU_MAIN_ITEMS - MENU_MAIN_VISIBLE + 1;
+    int max_index = menu_item_count - MENU_MAIN_VISIBLE + 1;
     if (max_index < 1) max_index = 1;
 
     if (index < 1) index = 1;
@@ -1007,7 +997,7 @@ void draw_menu_items(int index, int selected)
     for (k = 0; k < MENU_MAIN_VISIBLE; k++)
     {
         int item_idx = (index - 1) + k;
-        if (item_idx >= MENU_MAIN_ITEMS) break;
+        if (item_idx >= menu_item_count) break;
 
         int item_num = item_idx + 1;
         MenuItem *item = &menu_items[item_idx];
@@ -1042,7 +1032,7 @@ void draw_menu_items(int index, int selected)
 
     textcolor(WHITE);textbackground(BLACK);
     gotoxy(16,9);printf(index > 1 ? "↑" : " ");
-    gotoxy(16,20);printf(index + MENU_MAIN_VISIBLE <= MENU_MAIN_ITEMS ? "↓" : " ");
+    gotoxy(16,20);printf(index + MENU_MAIN_VISIBLE <= menu_item_count ? "↓" : " ");
 
     textcolor(WHITE);
     textbackground(BLACK);
@@ -1059,7 +1049,7 @@ void draw_problem_screen(
     int row = 6;
 
     if (selected < 1) selected = 1;
-    if (selected > MENU_MAIN_ITEMS) selected = MENU_MAIN_ITEMS;
+    if (selected > menu_item_count) selected = menu_item_count;
 
     if (title != NULL && title[0] != '\0')
     {

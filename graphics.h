@@ -40,20 +40,21 @@
 
 // Menu de opções
 #define MENU_MAIN_VISIBLE 10    // Número de opções visíveis no menu principal
-#define MENU_MAIN_ITEMS   17    // Número total de opções no menu principal
+#define MENU_MAIN_CAPACITY 64   // Capacidade máxima do menu principal
 #define MENU_TITLE_WIDTH 33     // Janela fixa para o título em movimento
 
-#define MENU_MAIN_DEVCALC 16
-#define MENU_MAIN_COBRA   17
+typedef void (*MenuAction)(void);
 
 typedef struct MenuItem
 {
 	const char *lesson;
 	const char *title;
 	const char *date;
+	MenuAction action;
 } MenuItem;
 
-extern MenuItem menu_items[MENU_MAIN_ITEMS];
+extern MenuItem menu_items[MENU_MAIN_CAPACITY];
+extern int menu_item_count;
 
 // Oculta o cursor do console
 #define hidecursor() puts("\e[?25l")   

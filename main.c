@@ -33,6 +33,7 @@
    #endif
 
    // Menu principal
+   initialize_menu_items();
    draw_menu();
    // Imprime os itens do menu (versão inicial)
    draw_menu_items(1, 1);
@@ -65,10 +66,10 @@
          // Os itens do menu são selecionados ciclicamente
          if (MenuSelected < 1)
          {
-            MenuSelected = MENU_MAIN_ITEMS;
-            MenuIndex = MENU_MAIN_ITEMS - MENU_MAIN_VISIBLE + 1;
+            MenuSelected = menu_item_count;
+            MenuIndex = menu_item_count - MENU_MAIN_VISIBLE + 1;
          }
-         else if (MenuSelected > MENU_MAIN_ITEMS)
+         else if (MenuSelected > menu_item_count)
          {
             MenuSelected = 1;
             MenuIndex = 1;
