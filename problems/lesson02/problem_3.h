@@ -4,22 +4,20 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define CAPACIDADE_3 100
+#define CAPACIDADE_FILA 100
 
 typedef struct {
-    int inicio;                 // índice do primeiro elemento da fila
-    int fim;                    // índice do último elemento da fila
-    int dados[CAPACIDADE_3];   // vetor para armazenar os elementos da fila
-    int quantidade;             // quantidade atual de elementos
-} Fila3;
+    int dados[CAPACIDADE_FILA];
+    int inicio, final, tamanho;   
+} Fila;
 
-void problem_3(void);
-void inicializarFila3(Fila3 *f);
-bool fila3Cheia(Fila3 *f);
-bool fila3Vazia(Fila3 *f);
-bool enqueue3(Fila3 *f, int valor);
-bool dequeue3(Fila3 *f, int *valor);
-bool frente3(Fila3 *f, int *valor);
-void printFila3(Fila3 *f);
+void problem_3( void );
+void fila_inicializar ( Fila *fila );
+bool fila_cheia (Fila *fila );
+bool fila_vazia (Fila *fila );
+bool fila_enfileirar ( Fila *fila, int valor );
+bool fila_desenfileirar ( Fila *fila, int *valor );
+bool fila_frente ( Fila *fila, int *valor );
+void fila_imprimir ( Fila *fila );
 
 #endif /* PROBLEM_3_H */

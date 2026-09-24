@@ -18,24 +18,24 @@ unsigned char ascii_problem_2[] = {
 };
 unsigned int ascii_problem_2_length = 58;
 
-void inicializar ( Pilha *pilha )
+void inicializar_pilha ( Pilha *pilha )
 {
     pilha->topo = -1; 
 }
 
-bool estaVazia ( Pilha *pilha ) 
+bool pilha_vazia ( Pilha *pilha ) 
 {
     return pilha->topo == -1;
 }
 
-bool estaCheia ( Pilha *pilha ) 
+bool pilha_cheia ( Pilha *pilha ) 
 {
-    return pilha->topo == CAPACIDADE - 1;
+    return pilha->topo == CAPACIDADE_PILHA - 1;
 }
 
-bool push ( Pilha *pilha, int valor ) 
+bool pilha_empilhar ( Pilha *pilha, int valor ) 
 {
-    if ( estaCheia( pilha ) ) 
+    if ( pilha_cheia( pilha ) ) 
     {
         //printf("Estouro de pilha! Não é possível inserir o valor %d.\n", valor);
         return false;
@@ -46,9 +46,9 @@ bool push ( Pilha *pilha, int valor )
     return true;
 }
 
-bool pop ( Pilha *pilha, int *valor ) 
+bool pilha_desempilhar ( Pilha *pilha, int *valor ) 
 {
-    if ( estaVazia(pilha ) )
+    if ( pilha_vazia(pilha ) )
     {
         //printf("Pilha vazia! Não é possível remover elementos.\n");
         return false;
@@ -59,9 +59,9 @@ bool pop ( Pilha *pilha, int *valor )
     return true;
 }
 
-bool peek ( Pilha *pilha, int *valor ) 
+bool pilha_topo ( Pilha *pilha, int *valor ) 
 {
-    if ( estaVazia ( pilha ) ) 
+    if ( pilha_vazia ( pilha ) ) 
     {
         //printf("Pilha vazia! Não há elementos para consultar.\n");
         return false;
@@ -72,9 +72,9 @@ bool peek ( Pilha *pilha, int *valor )
     return true;
 }
 
-void print ( Pilha *pilha ) 
+void print_pilha ( Pilha *pilha ) 
 {
-    if ( estaVazia ( pilha ) ) 
+    if ( pilha_vazia ( pilha ) ) 
     {
         //printf("Pilha vazia!\n");
         return;
@@ -99,29 +99,28 @@ void problem_2(void)
 
     Pilha _pilha;
 
-    inicializar( &_pilha);
+    inicializar_pilha( &_pilha);
 
-    gotoxy(9, 8);textcolor(GREEN); printf("[EMPILHAR]\t: 1\n"); push(&_pilha, 1);
-    gotoxy(9, 9);textcolor(GREEN); printf("[EMPILHAR]\t: 2\n"); push(&_pilha, 2);
-    gotoxy(9, 10);textcolor(GREEN); printf("[EMPILHAR]\t: 3\n"); push(&_pilha, 3);
-    gotoxy(9, 11);textcolor(GREEN); printf("[EMPILHAR]\t: 4\n"); push(&_pilha, 4);
+    gotoxy(9, 8);textcolor(GREEN);  printf("[EMPILHAR]\t: 1\n"); pilha_empilhar(&_pilha, 1);
+    gotoxy(9, 9);textcolor(GREEN);  printf("[EMPILHAR]\t: 2\n"); pilha_empilhar(&_pilha, 2);
+    gotoxy(9, 10);textcolor(GREEN); printf("[EMPILHAR]\t: 3\n"); pilha_empilhar(&_pilha, 3);
+    gotoxy(9, 11);textcolor(GREEN); printf("[EMPILHAR]\t: 4\n"); pilha_empilhar(&_pilha, 4);
 
-    gotoxy(9, 12);textcolor(BLUE); print(& _pilha);
+    gotoxy(9, 12);textcolor(BLUE);  print_pilha(& _pilha);
     gotoxy(9, 13);textcolor(WHITE); printf("[TOPO DA PILHA]\t: %d\n", _pilha.dados[ _pilha.topo ]);
         
     int valor;
-    if (pop(&_pilha, &valor)) 
+    if (pilha_desempilhar(&_pilha, &valor)) 
     {
         gotoxy(9, 14);textcolor(RED);
         printf("[DESEMPILHAR]\t: %d\n", valor);
     }
 
-    gotoxy(9, 15);textcolor(BLUE); print(&_pilha);
+    gotoxy(9, 15);textcolor(BLUE);  print_pilha(&_pilha);
     
-    gotoxy(9, 16);textcolor(GREEN); printf("[EMPILHAR]\t: 5\n");
-    push(&_pilha, 5);
+    gotoxy(9, 16);textcolor(GREEN); printf("[EMPILHAR]\t: 5\n"); pilha_empilhar(&_pilha, 5);
     
-    gotoxy(9, 17);textcolor(BLUE); print(&_pilha);
+    gotoxy(9, 17);textcolor(BLUE);  print_pilha(&_pilha);
     
     //---------------------------------------------------
     waitEsc();

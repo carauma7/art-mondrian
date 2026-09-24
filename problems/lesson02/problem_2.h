@@ -4,18 +4,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define CAPACIDADE 100
+#define CAPACIDADE_PILHA 100
 
 typedef struct {
-    int dados[ CAPACIDADE ]; 
+    int dados[ CAPACIDADE_PILHA ]; 
     int topo;              
 } Pilha;
 
 void problem_2( void );
-void inicializar( Pilha *p );
-bool estaCheia( Pilha *p );
-bool estaVazia( Pilha *p );
-bool push( Pilha *p, int valor );
-bool pop( Pilha *p, int *valor );
+void inicializar_pilha( Pilha *p );
+bool pilha_cheia( Pilha *p );
+bool pilha_vazia( Pilha *p );
+bool pilha_empilhar( Pilha *p, int valor );
+bool pilha_desempilhar( Pilha *p, int *valor );
+bool pilha_topo( Pilha *p, int *valor );
 
 #endif /* PROBLEM_2_H */
