@@ -18,109 +18,111 @@ unsigned char ascii_problem_2[] = {
 };
 unsigned int ascii_problem_2_length = 58;
 
-// Inicializa o topo como -1, indicando que a pilha está vazia
-void inicializar(Pilha *p) {
-    p->topo = -1; 
+void inicializar ( Pilha *pilha )
+{
+    pilha->topo = -1; 
 }
 
-// Verifica se a pilha está cheia
-bool estaCheia(Pilha *p) {
-    return p->topo == CAPACIDADE - 1;
+bool estaVazia ( Pilha *pilha ) 
+{
+    return pilha->topo == -1;
 }
 
-// Verifica se a pilha está vazia
-bool estaVazia(Pilha *p) {
-    return p->topo == -1;
+bool estaCheia ( Pilha *pilha ) 
+{
+    return pilha->topo == CAPACIDADE - 1;
 }
 
-// Inserir elemento na pilha (push)
-bool push(Pilha *p, int valor) {
-    if (estaCheia(p)) {
-        printf("Estouro de pilha! Não é possível inserir o valor %d.\n", valor);
-        return false; // Pilha cheia
+bool push ( Pilha *pilha, int valor ) 
+{
+    if ( estaCheia( pilha ) ) 
+    {
+        //printf("Estouro de pilha! Não é possível inserir o valor %d.\n", valor);
+        return false;
     }
-    p->topo++;
-    p->dados[p->topo] = valor;
+    
+    pilha->dados[++pilha->topo] = valor;
+
     return true;
 }
 
-// Desempilhar elemento da pilha (pop)
-bool pop(Pilha *p, int *valor) {
-    if (estaVazia(p)) {
-        printf("Pilha vazia! Não é possível remover elementos.\n");
-        return false; // Pilha vazia
+bool pop ( Pilha *pilha, int *valor ) 
+{
+    if ( estaVazia(pilha ) )
+    {
+        //printf("Pilha vazia! Não é possível remover elementos.\n");
+        return false;
     }
-    *valor = p->dados[p->topo];
-    p->topo--;
+    
+    *valor = pilha->dados[pilha->topo--];
+
     return true;
 }
 
-// Consultar o elemento no topo da pilha (peek)
-bool peek(Pilha *p, int *valor) {
-    if (estaVazia(p)) {
-        printf("Pilha vazia! Não há elementos para consultar.\n");
-        return false; // Pilha vazia
+bool peek ( Pilha *pilha, int *valor ) 
+{
+    if ( estaVazia ( pilha ) ) 
+    {
+        //printf("Pilha vazia! Não há elementos para consultar.\n");
+        return false;
     }
-    *valor = p->dados[p->topo];
+    
+    *valor = pilha->dados[pilha->topo];
+
     return true;
 }
 
-// Exibir os elementos da pilha
-void print(Pilha *p) {
-    if (estaVazia(p)) {
-        printf("Pilha vazia!\n");
+void print ( Pilha *pilha ) 
+{
+    if ( estaVazia ( pilha ) ) 
+    {
+        //printf("Pilha vazia!\n");
         return;
     }
-    printf("Elementos da pilha (do topo para a base): ");
-    for (int i = p->topo; i >= 0; i--) {
-        printf("%d ", p->dados[i]);
+
+    printf("[PILHA]\t\t: ");
+
+    for (int i = pilha->topo; i >= 0; i--) 
+    {
+        i == 0 ? printf("%d ", pilha->dados[ i ]) : printf("%d ← ", pilha->dados[ i ]);
     }
+
     printf("\n");
 }
 
 void problem_2(void)
 {
-    draw_problem_screen(2,(const char *) ascii_problem_2);
+    draw_problem_screen(2, ( const char * ) ascii_problem_2);
     //----------------------------------------------------
 
     textcolor(WHITE); textbackground(BLACK);
 
-    Pilha p;
-    inicializar(&p);
-    push(&p, 1);
-    push(&p, 3);
-    push(&p, 7);
-    gotoxy(9, 12);
-    print(&p);
-    gotoxy(9, 13);
-    printf("Topo da pilha: %d\n", p.dados[p.topo]);
+    Pilha _pilha;
+
+    inicializar( &_pilha);
+
+    gotoxy(9, 8);textcolor(GREEN); printf("[EMPILHAR]\t: 1\n"); push(&_pilha, 1);
+    gotoxy(9, 9);textcolor(GREEN); printf("[EMPILHAR]\t: 2\n"); push(&_pilha, 2);
+    gotoxy(9, 10);textcolor(GREEN); printf("[EMPILHAR]\t: 3\n"); push(&_pilha, 3);
+    gotoxy(9, 11);textcolor(GREEN); printf("[EMPILHAR]\t: 4\n"); push(&_pilha, 4);
+
+    gotoxy(9, 12);textcolor(BLUE); print(& _pilha);
+    gotoxy(9, 13);textcolor(WHITE); printf("[TOPO DA PILHA]\t: %d\n", _pilha.dados[ _pilha.topo ]);
+        
     int valor;
-    gotoxy(9, 14);
-    if (pop(&p, &valor)) {
-        printf("Desempilhando elemento: %d\n", valor);
+    if (pop(&_pilha, &valor)) 
+    {
+        gotoxy(9, 14);textcolor(RED);
+        printf("[DESEMPILHAR]\t: %d\n", valor);
     }
-    gotoxy(9, 15);
-    print(&p);
-    push(&p, 9);
-    gotoxy(9, 16);
-    print(&p);
 
-    //#define VECTOR_SIZE 5341
-    //int i, collisions = 0, value;
-    //int vector[VECTOR_SIZE] = {0};
-
-    //srand((unsigned int) time(NULL));
-
-    //for (i = 0 ; i < 2000; i++)
-   // {
-    //    value = (rand() % 1000000) + 1;
-    //    if (vector[value % VECTOR_SIZE] != 0)
-    //        collisions++;
-    //    vector[value % VECTOR_SIZE] = value;
-    //}    
-    //gotoxy(9, 12);
-    //textcolor(WHITE); textbackground(BLACK);
-    //printf("Número total de colisões: \e[31;40m%d\e[37;40m.", collisions);
+    gotoxy(9, 15);textcolor(BLUE); print(&_pilha);
+    
+    gotoxy(9, 16);textcolor(GREEN); printf("[EMPILHAR]\t: 5\n");
+    push(&_pilha, 5);
+    
+    gotoxy(9, 17);textcolor(BLUE); print(&_pilha);
+    
     //---------------------------------------------------
     waitEsc();
 }
