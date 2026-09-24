@@ -33,7 +33,7 @@ bool fila_vazia ( Fila *fila )
     return fila->tamanho == 0;
 }
 
-bool fila_enfileirar ( Fila *fila, int valor ) 
+bool fila_enfileirar ( Fila *fila, char valor ) 
 {
     if ( fila_cheia( fila ) ) 
     {
@@ -54,7 +54,7 @@ bool fila_enfileirar ( Fila *fila, int valor )
     return true;
 }
 
-bool fila_desenfileirar ( Fila *fila, int *valor ) 
+bool fila_desenfileirar ( Fila *fila, char *valor ) 
 {
     if ( fila_vazia( fila ) ) 
     {
@@ -66,16 +66,10 @@ bool fila_desenfileirar ( Fila *fila, int *valor )
     fila->inicio = (fila->inicio + 1) % CAPACIDADE_FILA;
     fila->tamanho--;
 
-    if ( fila_vazia( fila ) ) 
-    {
-        fila->inicio = 0;
-        fila->final = -1;
-    }
-
     return true;
 }
 
-bool fila_frente ( Fila *fila, int *valor ) 
+bool fila_frente ( Fila *fila, char *valor ) 
 {
     if ( fila_vazia( fila ) ) 
     {
@@ -83,7 +77,7 @@ bool fila_frente ( Fila *fila, int *valor )
         return false;
     }
 
-    *valor = fila->dados[fila->inicio];
+    *valor = fila->dados[ fila->inicio ];
     return true;
 }
 
@@ -98,7 +92,7 @@ void fila_imprimir ( Fila *f )
     printf("[FILA]\t\t: ");
     for (int i = 0; i < f->tamanho; i++) 
     {
-        printf("%d ", f->dados[(f->inicio + i) % CAPACIDADE_FILA]);
+        i == f->tamanho - 1 ? printf("%c ", f->dados[(f->inicio + i) % CAPACIDADE_FILA]) : printf("%c ← ", f->dados[(f->inicio + i) % CAPACIDADE_FILA]);
     }
     printf("\n");
 }
@@ -113,31 +107,31 @@ void problem_3(void)
     Fila _fila;
     fila_inicializar( &_fila );
     
-    gotoxy(9, 8);  textcolor(GREEN); printf("[ENFILEIRAR]\t: %d\n", 1); fila_enfileirar( &_fila, 1);
-    gotoxy(9, 9);  textcolor(GREEN); printf("[ENFILEIRAR]\t: %d\n", 2); fila_enfileirar( &_fila, 2);
-    gotoxy(9, 10); textcolor(GREEN); printf("[ENFILEIRAR]\t: %d\n", 3); fila_enfileirar( &_fila, 3);
-    gotoxy(9, 11); textcolor(GREEN); printf("[ENFILEIRAR]\t: %d\n", 4); fila_enfileirar( &_fila, 4);
+    gotoxy(9, 8);  textcolor(GREEN); printf("[ENFILEIRAR]\t: %c\n", '1'); fila_enfileirar( &_fila, '1');
+    gotoxy(9, 9);  textcolor(GREEN); printf("[ENFILEIRAR]\t: %c\n", '2'); fila_enfileirar( &_fila, '2');
+    gotoxy(9, 10); textcolor(GREEN); printf("[ENFILEIRAR]\t: %c\n", '3'); fila_enfileirar( &_fila, '3');
+    gotoxy(9, 11); textcolor(GREEN); printf("[ENFILEIRAR]\t: %c\n", '4'); fila_enfileirar( &_fila, '4');
 
     gotoxy(9, 12); textcolor(BLUE); fila_imprimir ( &_fila );
     
-    int valor;
-    if (fila_frente(& _fila, &valor)) 
+    char valor;
+    if ( fila_frente( &_fila, &valor )) 
     {
         gotoxy(9, 13); textcolor(WHITE);
-        printf("[FRENTE]\t: %d\n", valor);
+        printf("[FRENTE]\t: %c\n", valor);
     }
     
-    if (fila_desenfileirar(& _fila, &valor)) 
+    if (fila_desenfileirar( &_fila, &valor)) 
     {
         gotoxy(9, 14); textcolor(RED);
-        printf("[DESENFILEIRAR]\t: %d\n", valor);
+        printf("[DESENFILEIRAR]\t: %c\n", valor);
     }
 
-    gotoxy(9, 15); textcolor(BLUE); fila_imprimir(& _fila);
+    gotoxy(9, 15); textcolor(BLUE); fila_imprimir(&_fila);
 
-    gotoxy(9, 16); textcolor(GREEN); printf("[ENFILEIRAR]\t: %d\n", 5); fila_enfileirar(& _fila, 5);
+    gotoxy(9, 16); textcolor(GREEN); printf("[ENFILEIRAR]\t: %c\n", '5'); fila_enfileirar(&_fila, '5');
     
-    gotoxy(9, 17); textcolor(BLUE); fila_imprimir(& _fila);
+    gotoxy(9, 17); textcolor(BLUE); fila_imprimir(&_fila);
 
     //---------------------------------------------------
     waitEsc();

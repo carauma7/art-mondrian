@@ -33,7 +33,7 @@ bool pilha_cheia ( Pilha *pilha )
     return pilha->topo == CAPACIDADE_PILHA - 1;
 }
 
-bool pilha_empilhar ( Pilha *pilha, int valor ) 
+bool pilha_empilhar ( Pilha *pilha, char valor ) 
 {
     if ( pilha_cheia( pilha ) ) 
     {
@@ -46,7 +46,7 @@ bool pilha_empilhar ( Pilha *pilha, int valor )
     return true;
 }
 
-bool pilha_desempilhar ( Pilha *pilha, int *valor ) 
+bool pilha_desempilhar ( Pilha *pilha, char *valor ) 
 {
     if ( pilha_vazia(pilha ) )
     {
@@ -59,7 +59,7 @@ bool pilha_desempilhar ( Pilha *pilha, int *valor )
     return true;
 }
 
-bool pilha_topo ( Pilha *pilha, int *valor ) 
+bool pilha_topo ( Pilha *pilha, char *valor ) 
 {
     if ( pilha_vazia ( pilha ) ) 
     {
@@ -101,24 +101,24 @@ void problem_2(void)
 
     inicializar_pilha( &_pilha);
 
-    gotoxy(9, 8);textcolor(GREEN);  printf("[EMPILHAR]\t: 1\n"); pilha_empilhar(&_pilha, 1);
-    gotoxy(9, 9);textcolor(GREEN);  printf("[EMPILHAR]\t: 2\n"); pilha_empilhar(&_pilha, 2);
-    gotoxy(9, 10);textcolor(GREEN); printf("[EMPILHAR]\t: 3\n"); pilha_empilhar(&_pilha, 3);
-    gotoxy(9, 11);textcolor(GREEN); printf("[EMPILHAR]\t: 4\n"); pilha_empilhar(&_pilha, 4);
+    gotoxy(9, 8);textcolor(GREEN);  printf("[EMPILHAR]\t: 1\n"); pilha_empilhar(&_pilha, '1');
+    gotoxy(9, 9);textcolor(GREEN);  printf("[EMPILHAR]\t: 2\n"); pilha_empilhar(&_pilha, '2');
+    gotoxy(9, 10);textcolor(GREEN); printf("[EMPILHAR]\t: 3\n"); pilha_empilhar(&_pilha, '3');
+    gotoxy(9, 11);textcolor(GREEN); printf("[EMPILHAR]\t: 4\n"); pilha_empilhar(&_pilha, '4');
 
     gotoxy(9, 12);textcolor(BLUE);  print_pilha(& _pilha);
-    gotoxy(9, 13);textcolor(WHITE); printf("[TOPO DA PILHA]\t: %d\n", _pilha.dados[ _pilha.topo ]);
+    gotoxy(9, 13);textcolor(WHITE); printf("[TOPO DA PILHA]\t: %c\n", _pilha.dados[ _pilha.topo ]);
         
-    int valor;
+    char valor;
     if (pilha_desempilhar(&_pilha, &valor)) 
     {
         gotoxy(9, 14);textcolor(RED);
-        printf("[DESEMPILHAR]\t: %d\n", valor);
+        printf("[DESEMPILHAR]\t: %c\n", valor);
     }
 
     gotoxy(9, 15);textcolor(BLUE);  print_pilha(&_pilha);
     
-    gotoxy(9, 16);textcolor(GREEN); printf("[EMPILHAR]\t: 5\n"); pilha_empilhar(&_pilha, 5);
+    gotoxy(9, 16);textcolor(GREEN); printf("[EMPILHAR]\t: 5\n"); pilha_empilhar(&_pilha, '5');
     
     gotoxy(9, 17);textcolor(BLUE);  print_pilha(&_pilha);
     
