@@ -47,16 +47,16 @@ void alunos_apagarTudo ( Aluno **inicio )
     *inicio = NULL;
 }
 
-void alunos_imprimir ( Aluno **inicio ) 
+void alunos_imprimir ( Aluno **inicio, int x, int y )
 {
     int indice = 0;
     Aluno *atual = *inicio;
     textcolor(WHITE);
-    gotoxy(9, 10); printf("NOME \t\t NOTA 1  NOTA 2  NOTA 3  MÉDIA\n");
+    gotoxy(x, y); printf("NOME \t\t NOTA 1  NOTA 2  NOTA 3  MÉDIA\n");
     while ( atual != NULL )
     {
         float mediaGeral = (atual->notas[0] + atual->notas[1] + atual->notas[2] ) / 3.0f;
-        gotoxy(9, 10 + indice + 1);
+        gotoxy(x, y + indice + 1);
         textcolor(WHITE);
         printf("%s \t", atual->nome);
 
@@ -145,6 +145,94 @@ Aluno *alunos_atualizar ( Aluno **inicio, char *nome, float nota1, float nota2, 
     return atual;
 }
 
+int alunos_totalDeAlunos ( Aluno **inicio ) 
+{
+    Aluno *atual = *inicio;
+    int total = 0;
+    while ( atual != NULL ) 
+    {
+        total++;
+        atual = atual->proximo;
+    }
+    return total;
+}
+
+Aluno *alunos_maiorMedia ( Aluno **inicio )
+{
+    Aluno *atual = *inicio;
+    Aluno *maior = NULL;
+    float maiorMedia = -1.0;
+    while (atual != NULL) 
+    {
+        float media = ( atual->notas[0] + atual->notas[1] + atual->notas[2] ) / 3.0;
+        if (media > maiorMedia) 
+        {
+            maiorMedia = media;
+            maior = atual;
+        }
+        atual = atual->proximo;
+    }
+    return maior;
+}
+
+Aluno *alunos_menorMedia ( Aluno **inicio )
+{
+    Aluno *atual = *inicio;
+    Aluno *menor = NULL;
+    float menorMedia = 101.0;
+    while (atual != NULL) 
+    {
+        float media = ( atual->notas[0] + atual->notas[1] + atual->notas[2] ) / 3.0;
+        if (media < menorMedia) 
+        {
+            menorMedia = media;
+            menor = atual;
+        }
+        atual = atual->proximo;
+    }
+    return menor;
+}
+
+Aluno *alunos_maiorNota ( Aluno **inicio )
+{
+    Aluno *atual = *inicio;
+    Aluno *maior = NULL;
+    float maiorNota = -1.0;
+    while (atual != NULL) 
+    {
+        for (int i = 0; i < 3; i++) 
+        {
+            if (atual->notas[i] > maiorNota) 
+            {
+                maiorNota = atual->notas[i];
+                maior = atual;
+            }
+        }
+        atual = atual->proximo;
+    }
+    return maior;
+}
+
+Aluno *alunos_menorNota ( Aluno **inicio )
+{
+    Aluno *atual = *inicio;
+    Aluno *menor = NULL;
+    float menorNota = 101.0;
+    while (atual != NULL) 
+    {
+        for (int i = 0; i < 3; i++) 
+        {
+            if (atual->notas[i] < menorNota) 
+            {
+                menorNota = atual->notas[i];
+                menor = atual;
+            }
+        }
+        atual = atual->proximo;
+    }
+    return menor;
+}
+
 void problem_7(void)
 {
     draw_problem_screen( 4 , ( const char * ) ascii_problema_7 );
@@ -170,7 +258,7 @@ void problem_7(void)
     Aluno *atualizar = alunos_atualizar ( &_lista, "A. Tordoada", 7.12, 8.34, 8.56);
     gotoxy(9, 18); atualizar != NULL ? printf("Atualizou a NOTA 3 da '%s' de '%.2f' para '%.2f'.", atualizar->nome, 7.56, atualizar->notas[2]) : printf("Aluna '%s' não cadastrada.", "A. Tordoada");
 
-    alunos_imprimir ( &_lista );
+    alunos_imprimir ( &_lista, 9, 10 );
 
     //textcolor(WHITE); 
     //textbackground(BLACK);

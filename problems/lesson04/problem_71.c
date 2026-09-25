@@ -35,10 +35,27 @@ void problem_71(void)
 {
     draw_problem_screen( 5 , ( const char * ) ascii_problema_71 );
     //----------------------------------------------------
+    Aluno *alunos;
 
-    textcolor(GREEN);textbackground(BLACK);
-    gotoxy(9, 11); printf("Digite o número de crianças (n)");
-    gotoxy(9, 12); printf("ou 'sair' para encerrar.");
+    alunos_inicializar ( &alunos );
+
+    alunos_cadastrar ( &alunos, "A. Toa    ", 7.12, 8.34, 9.01);
+    alunos_cadastrar ( &alunos, "B. B. Cana", 6.78, 7.89, 8.12);
+    
+    alunos_imprimir ( &alunos, 9, 11 );
+    
+    textcolor(BLUE);textbackground(BLACK);
+    gotoxy(9, 15); printf("Lista possui '%d' alunos.", alunos_totalDeAlunos(&alunos));
+
+    textcolor(GREEN);textbackground(BLACK);        
+    gotoxy(9, 16); printf("Aluno com maior média: %s, com nota %.2f.", alunos_maiorMedia(&alunos)->nome, (alunos_maiorMedia(&alunos)->notas[0] + alunos_maiorMedia(&alunos)->notas[1] + alunos_maiorMedia(&alunos)->notas[2]) / 3.0);
+    gotoxy(9, 17); printf("Aluno com menor média: %s, com nota %.2f.", alunos_menorMedia(&alunos)->nome, (alunos_menorMedia(&alunos)->notas[0] + alunos_menorMedia(&alunos)->notas[1] + alunos_menorMedia(&alunos)->notas[2]) / 3.0);
+    gotoxy(9, 18); printf("Aluno com maior nota: %s, com nota %.2f.", alunos_maiorNota(&alunos)->nome, alunos_maiorNota(&alunos)->notas[0] > alunos_maiorNota(&alunos)->notas[1] ? (alunos_maiorNota(&alunos)->notas[0] > alunos_maiorNota(&alunos)->notas[2] ? alunos_maiorNota(&alunos)->notas[0] : alunos_maiorNota(&alunos)->notas[2]) : (alunos_maiorNota(&alunos)->notas[1] > alunos_maiorNota(&alunos)->notas[2] ? alunos_maiorNota(&alunos)->notas[1] : alunos_maiorNota(&alunos)->notas[2]));
+    gotoxy(9, 19); printf("Aluno com menor nota: %s, com nota %.2f.", alunos_menorNota(&alunos)->nome, alunos_menorNota(&alunos)->notas[0] < alunos_menorNota(&alunos)->notas[1] ? (alunos_menorNota(&alunos)->notas[0] < alunos_menorNota(&alunos)->notas[2] ? alunos_menorNota(&alunos)->notas[0] : alunos_menorNota(&alunos)->notas[2]) : (alunos_menorNota(&alunos)->notas[1] < alunos_menorNota(&alunos)->notas[2] ? alunos_menorNota(&alunos)->notas[1] : alunos_menorNota(&alunos)->notas[2]));
+    //gotoxy(9, 11); printf("Digite o número de crianças (n)");
+    //gotoxy(9, 12); printf("ou 'sair' para encerrar.");
+
+    alunos_apagarTudo ( &alunos );
 
     //---------------------------------------------------
     waitEsc();
