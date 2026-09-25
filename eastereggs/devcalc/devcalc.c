@@ -151,10 +151,11 @@ void devcalcRun(void)
 
     textcolor(GREEN);
     gotoxy(DEVCALC_X, line);
-    printf("Entrada: ");
+    printf("Entrada: \e[?25h");
     textcolor(WHITE);
     if (fgets(m_func, MAX_CHAR, stdin) == NULL)
     {
+        hidecursor();
         free(m_func);
         return;
     }
@@ -224,7 +225,7 @@ void devcalcRun(void)
 
         textcolor(GREEN);
         gotoxy(DEVCALC_X, line);
-        printf("Entrada: ");
+        printf("Entrada: \e[?25h");
         textcolor(WHITE);
         if (fgets(m_func, MAX_CHAR, stdin) == NULL)
         {
@@ -236,6 +237,7 @@ void devcalcRun(void)
         free(input_without_spaces);
     }
 
+    hidecursor();
     free(m_func);
     textcolor(WHITE);
     textbackground(BLACK);

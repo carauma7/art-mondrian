@@ -38,6 +38,7 @@
 #define AUDIO_MAP10               "audio/map10.mp3"
 #define AUDIO_EVILLAUGH			"audio/evil-laugh.mp3"
 #define AUDIO_DEAD              "audio/dead.mp3"
+#define AUDIO_HURT              "audio/hurt.mp3"
 #define AUDIO_GAMEOVER_MUSIC   "audio/gameover-music.mp3"
 #define AUDIO_GAMEOVER_VOICE   "audio/gameover-voice.mp3"
 #define AUDIO_GLITCH            "audio/glitch.mp3"
@@ -57,6 +58,8 @@ extern unsigned long int audio_shootchannel;
 extern unsigned long int audio_shoot_foodchannel;
 extern unsigned long int audio_shot_missedchannel;
 extern unsigned long int audio_foodchannel;
+extern unsigned long int audio_deadchannel;
+extern unsigned long int audio_hurtchannel;
 extern unsigned long int audio_voicechannel;
 extern unsigned long int audio_gameover_musicchannel;
 extern unsigned long int audio_gameover_voicechannel;

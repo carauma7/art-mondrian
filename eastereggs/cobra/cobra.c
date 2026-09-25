@@ -2108,6 +2108,9 @@ void kill_active_snake(void)
     snake_alive[active_snake_idx] = 0;
     remaining_snakes = active_snake_count();
 
+    audio_play(&audio_deadchannel, AUDIO_DEAD, FALSE);
+    audio_play(&audio_hurtchannel, AUDIO_HURT, FALSE);
+
     if (remaining_snakes > 0)
     {
         audio_play(&audio_voicechannel, AUDIO_EVILLAUGH, FALSE);

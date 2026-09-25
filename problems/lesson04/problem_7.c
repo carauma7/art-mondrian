@@ -61,13 +61,13 @@ void alunos_imprimir ( Aluno **inicio )
         printf("%s \t", atual->nome);
 
         textcolor(atual->notas[0] < 7.0f ? RED : atual->notas[0] > 7.0f ? GREEN : WHITE);
-        printf("%.2f \t", atual->notas[0]);
+        printf(" %.2f \t", atual->notas[0]);
         textcolor(atual->notas[1] < 7.0f ? RED : atual->notas[1] > 7.0f ? GREEN : WHITE);
-        printf("%.2f \t", atual->notas[1]);
+        printf(" %.2f \t", atual->notas[1]);
         textcolor(atual->notas[2] < 7.0f ? RED : atual->notas[2] > 7.0f ? GREEN : WHITE);
-        printf("%.2f \t", atual->notas[2]);
+        printf(" %.2f \t", atual->notas[2]);
         textcolor(mediaGeral < 7.0f ? RED : mediaGeral > 7.0f ? GREEN : WHITE);
-        printf("%.2f\n", mediaGeral);
+        printf(" %.2f\n", mediaGeral);
 
         indice++;        
         atual = atual->proximo;

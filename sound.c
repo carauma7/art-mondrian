@@ -30,6 +30,8 @@ unsigned long int audio_shootchannel;
 unsigned long int audio_shoot_foodchannel;
 unsigned long int audio_shot_missedchannel;
 unsigned long int audio_foodchannel;
+unsigned long int audio_deadchannel;
+unsigned long int audio_hurtchannel;
 
 // Canal reservado para vozes (ex: risada malévola), evita ser abafado por efeitos curtos
 unsigned long int audio_voicechannel;
