@@ -41,55 +41,6 @@ unsigned char ascii_problema_6[] = {
 };
 unsigned int ascii_problema_6_length = 269;
 
-// Inicializa a fila
-void inicializarFila(Fila *f) {
-    f->inicio = NULL;
-    f->fim = NULL;
-    f->quantidade = 0;
-}
-
-// Verifica se a fila está vazia
-bool filaVazia(Fila *f) {
-    return (f->inicio == NULL);
-}
-
-// Inserir elemento na fila (enqueue)
-bool enqueue(Fila *f, int valor) {
-    No *novo = (No *) malloc(sizeof(No));
-    if (!novo) return false;
-    novo->valor = valor;
-    novo->prox = NULL;
-    if (f->fim == NULL) {
-        f->inicio = novo;
-        f->fim = novo;
-    } else {
-        f->fim->prox = novo;
-        f->fim = novo;
-    }
-    f->quantidade++;
-    return true;
-}
-
-// Remover elemento da fila (dequeue)
-bool dequeue(Fila *f, int *valor) {
-    if (filaVazia(f)) return false;
-    No *temp = f->inicio;
-    *valor = temp->valor;
-    f->inicio = f->inicio->prox;
-    if (f->inicio == NULL) {
-        f->fim = NULL;
-    }
-    free(temp);
-    f->quantidade--;
-    return true;
-}
-
-// Destrói a fila e libera toda a memória alocada
-void destruirFila(Fila *f) {
-    int dummy;
-    while (dequeue(f, &dummy));
-}
-
 // Resolve o problema da Batata Quente usando Fila
 int hotPotato(int n, int k) {
 
@@ -97,49 +48,45 @@ int hotPotato(int n, int k) {
         return 0;
     }
 
-    Fila f;
-    inicializarFila(&f);
+    Fila fila;
+
+    fila_inicializar ( &fila );
 
     // Enfileira as crianças de 1 a n
-    for (int i = 1; i <= n; i++) {
-        enqueue(&f, i);
+    for (int i = 1; i <= n; i++) 
+    {
+        fila_enfileirar ( &fila, i );
     }
 
     // Passa a batata até sobrar apenas uma criança
-    while (f.quantidade > 1) {
-
+    while ( fila.tamanho > 1 ) 
+    {
         // Passa a batata k - 1 vezes (desenfileira e reenfileira)
-        for (int i = 1; i < k; i++) {
-
-            int crianca;
-
-            if (dequeue(&f, &crianca)) {
-
-                enqueue(&f, crianca);
-
+        for (int i = 1; i < k; i++) 
+        {
+            char crianca;
+            if ( fila_desenfileirar ( &fila, &crianca ) ) 
+            {
+                fila_enfileirar ( &fila, crianca);
             }
 
         }
 
         // A k-ésima criança sai da brincadeira (eliminada)
-
-        int eliminado;
-
-        dequeue(&f, &eliminado);
+        char eliminado;
+        fila_desenfileirar ( &fila, &eliminado) ;
     }
 
-    int vencedor = 0;
+    char vencedor = '0';
 
-    dequeue(&f, &vencedor);
-
-    destruirFila(&f);
+    fila_desenfileirar ( &fila, &vencedor);
 
     return vencedor;
 }
 
 void problem_6(void)
 {
-    draw_problem_screen(3,(const char *) ascii_problema_6);
+    draw_problem_screen( 3 , ( const char * ) ascii_problema_6 );
     //----------------------------------------------------
 
     textcolor(WHITE); textbackground(BLACK);
@@ -147,62 +94,51 @@ void problem_6(void)
     char buffer[100];
     int n, k;
 
-    gotoxy(9, 12);
-    printf("A batata está quente, rapaz");
-    gotoxy(9, 13);
-    printf("Digite 'sair' para encerrar.");
+    textcolor(GREEN);
+    gotoxy(9, 12); printf("Digite o número de crianças (n)");
+    gotoxy(9, 13); printf("ou 'sair' para encerrar.");
 
     while (1) {
-        gotoxy(9, 14); textcolor(YELLOW);
-        printf("                                                                 ");
-        gotoxy(9, 14);
-        printf("Número de crianças (n): ");textcolor(CYAN);
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) break;
+        gotoxy(9, 14); printf("                                                                 ");
+        gotoxy(9, 14); textcolor(YELLOW); printf("Número de crianças (n): \e[?25h");
+        textcolor(CYAN); if (fgets(buffer, sizeof(buffer), stdin) == NULL) {break;} buffer[strcspn(buffer, "\r\n")] = '\0';
 
-        buffer[strcspn(buffer, "\r\n")] = '\0';
-
-        if (strcmp(buffer, "sair") == 0) {
-            gotoxy(9, 18); textcolor(RED);
-            printf("Saindo...\n");
+        if (strcmp(buffer, "sair") == 0) 
+        {
             break;
         }
 
         if (strlen(buffer) == 0) continue;
         
-        n = atoi(buffer); // Converte a entrada para inteiro
+        n = atoi(buffer);
 
-        if (n <= 0) {
-            gotoxy(9, 16); textcolor(RED);
-            printf("Número inválido para n! Tente novamente.                          ");
+        if (n <= 0) 
+        {
+            gotoxy(9, 16); textcolor(RED); printf("Número inválido para n! Tente novamente.                          ");
             continue;
         }
 
-        gotoxy(9, 15); textcolor(YELLOW);
-        printf("                                                                 ");
-        gotoxy(9, 15);
-        printf("Passos a cada eliminação (k): ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) break;
+        gotoxy(9, 15); textcolor(YELLOW); printf("                                                                 ");
+        gotoxy(9, 15); printf("Passos a cada eliminação (k): \e[?25h");
+        
+        textcolor(CYAN); if (fgets(buffer, sizeof(buffer), stdin) == NULL) {break;} buffer[strcspn(buffer, "\r\n")] = '\0';
 
-        buffer[strcspn(buffer, "\r\n")] = '\0';
-
-        if (strcmp(buffer, "sair") == 0 || strcmp(buffer, "0") == 0) {
-            gotoxy(9, 18); textcolor(LIGHTMAGENTA);
-            printf("Saindo...\n");
+        if (strcmp(buffer, "sair") == 0 || strcmp(buffer, "0") == 0) 
+        {
             break;
         }
 
         k = atoi(buffer);
 
-        if (k <= 0) {
-            gotoxy(9, 16); textcolor(RED);
-            printf("Número inválido para k! Tente novamente.                          ");
+        if (k <= 0) 
+        {
+            gotoxy(9, 16); textcolor(RED); printf("Número inválido para k! Tente novamente.                          ");
             continue;
         }
 
         int vencedor = hotPotato(n, k);
 
-        gotoxy(9, 16); textcolor(GREEN);
-        printf("Resposta: Para n = %d e k = %d, a criança que sobra é a %d.", n, k, vencedor);
+        gotoxy(9, 16); textcolor(GREEN); printf("Resposta: Para n = %d e k = %d, a criança que sobra é a %d.", n, k, vencedor);
 
         gotoxy(9, 14); printf("                                                                 ");
         gotoxy(9, 15); printf("                                                                 ");

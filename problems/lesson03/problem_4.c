@@ -104,13 +104,11 @@ bool ePalindromo(char palavra[])
     int metadePalavra = tamanho / 2;
 
     // empilha a primeira metade da palavra
-    for (int i = 0; i < metadePalavra; i++) {
-    
+    for (int i = 0; i < metadePalavra; i++)
+    {    
         if (!pilha_empilhar( &pilha, palavra[ i ])) 
-        {
-    
-            return false;
-    
+        {    
+            return false;    
         }
     }
 
@@ -118,8 +116,8 @@ bool ePalindromo(char palavra[])
     int inicioComparacao = (tamanho % 2 == 0) ? metadePalavra : metadePalavra + 1;
 
     // compara a segunda metade da palavra com os elementos desempilhados
-    for (int i = inicioComparacao; i < tamanho; i++) {
-    
+    for (int i = inicioComparacao; i < tamanho; i++) 
+    {    
         char valor;
     
         if ( !pilha_desempilhar ( &pilha, &valor ) ) 
@@ -150,7 +148,7 @@ void problem_4(void)
     gotoxy(9, 11); printf("ou 'sair' para encerrar.\n\n");
 
     while (1) {
-        gotoxy(9, 13); textcolor(YELLOW); printf("Mande bala, qual a palavra?: "); 
+        gotoxy(9, 13); textcolor(YELLOW); printf("Mande bala, qual a palavra?: \e[?25h"); 
         
         textcolor(CYAN); if (fgets(textInput, sizeof(textInput), stdin) == NULL) break;
 

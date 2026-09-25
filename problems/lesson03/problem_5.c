@@ -37,56 +37,16 @@ unsigned char ascii_problema_5[] = {
 };
 unsigned int ascii_problema_5_length = 225;
 
-// Inicializa o topo como -1, indicando que a pilha está vazia
-void inicializarPilhaChar5(PilhaChar5 *p) {
-    p->topo = -1; 
-}
-
-// Verifica se a pilha está cheia
-bool pilhaCharCheia5(PilhaChar5 *p) {
-    return p->topo == CAPACIDADE - 1;
-}
-
-// Verifica se a pilha está vazia
-bool pilhaCharVazia5(PilhaChar5 *p) {
-    return p->topo == -1;
-}
-
-// Inserir elemento na pilha (push)
-bool pushPilhaChar5(PilhaChar5 *p, char valor) {
-    if (pilhaCharCheia5(p)) {
-        printf("Estouro de pilha! Não é possível inserir o valor %d.\n", valor);
-        return false; // Pilha cheia
-    }
-    p->topo++;
-    p->dados[p->topo] = valor;
-    return true;
-}
-
-// Desempilhar elemento da pilha (pop)
-bool popPilhaChar5(PilhaChar5 *p, char *valor) {
-    if (pilhaCharVazia5(p)) {
-        //printf("Pilha vazia! Não é possível remover elementos.\n");
-        return false; // Pilha vazia
-    }
-    *valor = p->dados[p->topo];
-    p->topo--;
-    return true;
-}
-
-/* Retorna true se o caractere é um símbolo de abertura */
 static bool isOpening(char c)
 {
     return c == '(' || c == '[' || c == '{';
 }
 
-/* Retorna true se o caractere é um símbolo de fechamento */
 static bool isClosing(char c)
 {
     return c == ')' || c == ']' || c == '}';
 }
 
-/* Retorna o símbolo de abertura correspondente ao fechamento informado */
 static char openingSymbol(char fechamento)
 {
     switch (fechamento) {
@@ -97,40 +57,41 @@ static char openingSymbol(char fechamento)
     }
 }
 
-/* Verifica se os símbolos de agrupamento em texto estão corretamente
- * abertos e fechados, na ordem correta, utilizando uma Pilha. */
 bool balancedText(const char *text)
 {
-    PilhaChar5 p;
+    Pilha _pilha;
 
-    inicializarPilhaChar5(&p);
+    inicializar_pilha ( &_pilha );
 
-    for (int i = 0; text[i] != '\0'; i++) {
+    for (int i = 0; text[i] != '\0'; i++) 
+    {
         char c = text[i];
 
-        // Se o caractere for um símbolo de abertura, empilha-o
-        if (isOpening(c)) {
-            if (!pushPilhaChar5(&p, c)) {
+        if (isOpening(c)) 
+        {
+            if (! pilha_empilhar ( &_pilha, c)) 
+            {
                 return false;
             }
-        // Se o caractere for um símbolo de fechamento, verifica se corresponde ao topo da pilha
-        } else if (isClosing(c)) {
+        } else if (isClosing(c)) 
+        {
             char valor;
 
-            if (pilhaCharVazia5(&p)) {
+            if ( pilha_vazia ( &_pilha )) 
+            {
                 return false; 
             }
 
-            popPilhaChar5(&p, &valor);
+            pilha_desempilhar ( &_pilha, &valor);
 
-            if (valor != openingSymbol(c)) {
+            if (valor != openingSymbol(c)) 
+            {
                 return false; 
             }
         }
     }
 
-    // Se a pilha estiver vazia no final, todos os símbolos foram balanceados
-    return pilhaCharVazia5(&p); 
+    return pilha_vazia ( &_pilha ); 
 }
 
 
@@ -141,38 +102,32 @@ void problem_5(void)
 
     textcolor(WHITE); textbackground(BLACK);
 
-    char textInput[CAPACIDADE];
+    char textInput[100];
 
-    gotoxy(9, 11);
-    printf("A parada tá balanceada?\n");
-    gotoxy(9, 12);
-    printf("Digite 'sair' para encerrar.\n\n");
+    textcolor(GREEN);
+    gotoxy(9, 11); printf("Digite a expressão para verificar\n");
+    gotoxy(9, 12); printf("ou 'sair' para encerrar.\n\n");
 
-    while (1) {
-        gotoxy(9, 13);textcolor(YELLOW);
-        printf("Mande bala, qual a expressão, meu nobre?: ");textcolor(CYAN);
-        if (fgets(textInput, sizeof(textInput), stdin) == NULL) break;
+    while (1) 
+    {
+        gotoxy(9, 13); textcolor(YELLOW); printf("Expressão: \e[?25h");
+        
+        textcolor(CYAN); if (fgets(textInput, sizeof(textInput), stdin) == NULL) break; textInput[strcspn(textInput, "\r\n")] = '\0';
 
-        textcolor(CYAN);
-        textInput[strcspn(textInput, "\r\n")] = '\0';
-
-        if (strcmp(textInput, "sair") == 0) {
-            gotoxy(9, 17);textcolor(LIGHTMAGENTA);
-            printf("Saindo...\n");
+        if ( strcmp( textInput, "sair" ) == 0 ) 
+        {
             break;
         }
 
         if (strlen(textInput) == 0) continue;
-
         
-        if (balancedText(textInput)) {
-            gotoxy(9, 15);textcolor(GREEN);            
-            printf("Resposta: \"%s\" está balanceado, meu bom.\n\n", textInput);
+        if (balancedText(textInput)) 
+        {
+            gotoxy(9, 15); textcolor(GREEN); printf("Resposta: \"%s\" está balanceado, meu bom.\n\n", textInput);
         } else {
-            gotoxy(9, 15);textcolor(RED);
-            printf("Resposta: \"%s\" não está balanceado, meu bom.\n\n", textInput);
+            gotoxy(9, 15); textcolor(RED); printf("Resposta: \"%s\" não está balanceado, meu bom.\n\n", textInput);
         }
-        gotoxy(9, 14);printf("                                                   ");
+        gotoxy(9, 13); printf("                                                                 ");
     }
 
     //---------------------------------------------------

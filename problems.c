@@ -9,6 +9,7 @@
 #include "problems/lesson03/problem_4.h"
 #include "problems/lesson03/problem_5.h"
 #include "problems/lesson03/problem_6.h"
+#include "problems/lesson04/problem_7.h"
 #include "eastereggs/devcalc/devcalc.h"
 #include "eastereggs/cobra/cobra.h"
 
@@ -40,12 +41,12 @@ void initialize_menu_items(void)
     menu_add_item(" Aula 03 ", "· Palíndromo ······················",       " 05/09/26", problem_4);
     menu_add_item("         ", "· Balanceamento ···················",       "",          problem_5);
     menu_add_item("         ", "· Problema de Josephus (Batata Quente)",    "",          problem_6);
-    menu_add_item(" Aula 04 ", "· Lista Simplesmente Encadeada ····",       " 12/09/26", NULL);
+    menu_add_item(" Aula 04 ", "· Lista Simplesmente Encadeada ····",       " 12/09/26", problem_7);
     menu_add_item(" Aula 05 ", "· Exercícios · Questão 01 · Lista Vazia ·", " 19/09/26", NULL);
     menu_add_item("         ", "· Exercícios · Questão 02 · Maior Valor ·", "",          NULL);
     menu_add_item("         ", "· Exercícios · Questão 03 · Concatenar Listas ·", "",    NULL);
     menu_add_item("         ", "· Exercícios · Questão 04 · Comparar Listas ·",   "",    NULL);
-    menu_add_item("         ", "· Exercícios · Questão 05 · Ausente ·",     "",          NULL);
+    menu_add_item("         ", "· Exercícios · Questão 05 · Valor Ausente ·",     "",          NULL);
     menu_add_item("         ", "· Exercícios · Questão 06 · Coordenadas ·", "",          NULL);
     menu_add_item("         ", "· Exercícios · Questão 07 · Inverter ·",    "",          NULL);
     menu_add_item("         ", "··································",                 "",          NULL);

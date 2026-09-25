@@ -100,7 +100,7 @@ int waitEsc(void)
 {        
     gotoxy(9, 21);
     textcolor(YELLOW);textbackground(BLACK);
-    printf("Pressione ESC para voltar ao menu...                            ");
+    printf("Pressione ESC para voltar ao menu...                            \e[?25l");
     gotoxy(45, 21);
     int ch = 0;
     do
