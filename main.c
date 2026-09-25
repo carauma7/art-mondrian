@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "graphics.h"
+#include "sound.h"
 #include "utils.h"
 #include "problems.h"
 
@@ -57,9 +58,11 @@
          {
             case 65: // Seta para cima
                MenuSelected--;
+               audio_play(&audio_effectchannel, AUDIO_MENU_SELECT, FALSE);
                break;
             case 66: // Seta para baixo
                MenuSelected++;
+               audio_play(&audio_effectchannel, AUDIO_MENU_SELECT, FALSE);
                break;
          }
 
@@ -89,6 +92,7 @@
       // Usuário pressionou a tecla ENTER
       if (keypressed.x == 10)
       {
+         audio_play(&audio_effectchannel, AUDIO_CONFIRM_SELECTION, FALSE);
          run_selected_problem(MenuSelected);
          draw_menu();
          draw_menu_items(MenuIndex, MenuSelected);

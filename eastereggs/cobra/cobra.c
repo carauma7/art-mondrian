@@ -1300,7 +1300,7 @@ void fire_bullet(void)
     bullet_pos = snake[HEAD];
     bullet_owner = active_snake_idx;
 
-    audio_play(&audio_effectchannel, AUDIO_SHOOT, FALSE);
+    audio_play(&audio_shootchannel, AUDIO_SHOOT, FALSE);
 
     old_tail = snake[snake_size - 1];
     snake_size--;
@@ -1352,6 +1352,8 @@ int update_bullet(void)
 
     if (!is_move_possible(bullet_pos, bullet_dir))
     {
+        audio_play(&audio_shot_missedchannel, AUDIO_SHOT_MISSED, FALSE);
+
         if (was_drawn)
         {
             erase_bullet();
@@ -1371,7 +1373,7 @@ int update_bullet(void)
 
     if (food_idx != ERR)
     {
-        audio_play(&audio_effectchannel, AUDIO_SHOOT_FOOD, FALSE);
+        audio_play(&audio_shoot_foodchannel, AUDIO_SHOOT_FOOD, FALSE);
 
         if (was_drawn)
         {
@@ -1411,6 +1413,8 @@ int update_bullet(void)
     // Um obstáculo interrompe o tiro sem ser removido.
     if (obstacle_at(next_pos))
     {
+        audio_play(&audio_shot_missedchannel, AUDIO_SHOT_MISSED, FALSE);
+
         if (was_drawn)
         {
             erase_bullet();
@@ -1597,7 +1601,7 @@ void make_move(int pbest_move)
 
     if (food_idx != ERR)
     {
-        audio_play(&audio_effectchannel, AUDIO_FOOD1, FALSE);
+        audio_play(&audio_foodchannel, AUDIO_FOOD1, FALSE);
 
         board[
             snake[HEAD]
@@ -2324,8 +2328,6 @@ static void draw_end_game_ascii(void)
         const unsigned char *p = art;
         unsigned int remaining = len;
 
-        textcolor(mondrian_oscillating_color(frame));
-
         while (remaining > 0 && line < total_lines)
         {
             int line_width = 0;
@@ -2343,7 +2345,12 @@ static void draw_end_game_ascii(void)
                 }
 
                 arena_gotoxy(start_x, start_y + line);
-                fwrite(p, 1, (size_t)line_width, stdout);
+
+                for (int column = 0; column < line_width; column++)
+                {
+                    textcolor(mondrian_oscillating_color(frame + line + column));
+                    fwrite(p + column, 1, 1, stdout);
+                }
             }
 
             if ((unsigned int)line_width < remaining && p[line_width] == '\n')
@@ -2616,8 +2623,9 @@ int cobraRun(void)
 
     if (snake_died)
     {
-        // Fundo (dead) e voz (evil laugh) começam junto com a animação visual.
-        audio_play(&audio_mainchannel, AUDIO_DEAD, FALSE);
+        // Música, voz de game over e risada começam simultaneamente.
+        audio_play(&audio_gameover_musicchannel, AUDIO_GAMEOVER_MUSIC, FALSE);
+        audio_play(&audio_gameover_voicechannel, AUDIO_GAMEOVER_VOICE, FALSE);
         audio_play(&audio_voicechannel, AUDIO_EVILLAUGH, FALSE);
         draw_end_game_ascii();
     }

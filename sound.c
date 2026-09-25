@@ -25,8 +25,16 @@ unsigned long int audio_mainchannel;
 // Canal auxiliar para efeitos curtos sobre o áudio principal
 unsigned long int audio_effectchannel;
 
+// Canais separados para sons de tiro e coleta de alimentos
+unsigned long int audio_shootchannel;
+unsigned long int audio_shoot_foodchannel;
+unsigned long int audio_shot_missedchannel;
+unsigned long int audio_foodchannel;
+
 // Canal reservado para vozes (ex: risada malévola), evita ser abafado por efeitos curtos
 unsigned long int audio_voicechannel;
+unsigned long int audio_gameover_musicchannel;
+unsigned long int audio_gameover_voicechannel;
 
 // Nome do último arquivo tocado no canal principal, usado por audio_is_track_playing
 static char last_track[256] = "";

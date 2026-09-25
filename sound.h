@@ -38,17 +38,28 @@
 #define AUDIO_MAP10               "audio/map10.mp3"
 #define AUDIO_EVILLAUGH			"audio/evil-laugh.mp3"
 #define AUDIO_DEAD              "audio/dead.mp3"
+#define AUDIO_GAMEOVER_MUSIC   "audio/gameover-music.mp3"
+#define AUDIO_GAMEOVER_VOICE   "audio/gameover-voice.mp3"
 #define AUDIO_GLITCH            "audio/glitch.mp3"
 #define AUDIO_SHOOT             "audio/shoot.mp3"
 #define AUDIO_BELLS             "audio/bells.mp3"
 #define AUDIO_SHOOT_FOOD        "audio/shoot-food.mp3"
+#define AUDIO_MENU_SELECT       "audio/menu-select.mp3"
+#define AUDIO_CONFIRM_SELECTION "audio/confirm-selection.mp3"
+#define AUDIO_SHOT_MISSED       "audio/shot-missed.mp3"
 #define AUDIO_GOODBYE           "audio/goodbye.mp3"
 #define AUDIO_LEVELUP           "audio/levelup.mp3"
 #define AUDIO_PAUSE             "audio/pause.mp3"
 
 extern unsigned long int audio_mainchannel;
 extern unsigned long int audio_effectchannel;
+extern unsigned long int audio_shootchannel;
+extern unsigned long int audio_shoot_foodchannel;
+extern unsigned long int audio_shot_missedchannel;
+extern unsigned long int audio_foodchannel;
 extern unsigned long int audio_voicechannel;
+extern unsigned long int audio_gameover_musicchannel;
+extern unsigned long int audio_gameover_voicechannel;
 
 int audio_initialize(void);
 void audio_terminate(void);

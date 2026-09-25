@@ -51,23 +51,28 @@ void alunos_imprimir ( Aluno **inicio )
 {
     int indice = 0;
     Aluno *atual = *inicio;
+    textcolor(WHITE);
     gotoxy(9, 10); printf("NOME \t\t NOTA 1  NOTA 2  NOTA 3  MÉDIA\n");
     while ( atual != NULL )
     {
-        // black \030[32m
-        // blue \030[34m
-        // red \030[31;1m
         float mediaGeral = (atual->notas[0] + atual->notas[1] + atual->notas[2] ) / 3.0f;
         gotoxy(9, 10 + indice + 1);
-        printf(
-            "%s \t %.2f \t %.2f \t %.2f \t %.2f\n",
-            atual->nome,
-            atual->notas[0], atual->notas[1], atual->notas[2],
-            mediaGeral
-        );
+        textcolor(WHITE);
+        printf("%s \t", atual->nome);
+
+        textcolor(atual->notas[0] < 7.0f ? RED : atual->notas[0] > 7.0f ? GREEN : WHITE);
+        printf("%.2f \t", atual->notas[0]);
+        textcolor(atual->notas[1] < 7.0f ? RED : atual->notas[1] > 7.0f ? GREEN : WHITE);
+        printf("%.2f \t", atual->notas[1]);
+        textcolor(atual->notas[2] < 7.0f ? RED : atual->notas[2] > 7.0f ? GREEN : WHITE);
+        printf("%.2f \t", atual->notas[2]);
+        textcolor(mediaGeral < 7.0f ? RED : mediaGeral > 7.0f ? GREEN : WHITE);
+        printf("%.2f\n", mediaGeral);
+
         indice++;        
         atual = atual->proximo;
     }
+    textcolor(WHITE);
 }
 
 int alunos_cadastrar ( Aluno **inicio, char *nome, float nota1, float nota2, float nota3)
