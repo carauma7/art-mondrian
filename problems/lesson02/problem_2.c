@@ -82,9 +82,9 @@ void print_pilha ( Pilha *pilha )
 
     printf("[PILHA]\t\t: ");
 
-    for (int i = pilha->topo; i >= 0; i--) 
+    for (int i = pilha->topo; i >= 0; i--)
     {
-        i == 0 ? printf("%d ", pilha->dados[ i ]) : printf("%d ← ", pilha->dados[ i ]);
+        i == 0 ? printf("%c ", pilha->dados[i]) : printf("%c ← ", pilha->dados[i]);
     }
 
     printf("\n");
@@ -106,8 +106,13 @@ void problem_2(void)
     gotoxy(9, 10);textcolor(GREEN); printf("[EMPILHAR]\t: 3\n"); pilha_empilhar(&_pilha, '3');
     gotoxy(9, 11);textcolor(GREEN); printf("[EMPILHAR]\t: 4\n"); pilha_empilhar(&_pilha, '4');
 
-    gotoxy(9, 12);textcolor(BLUE);  print_pilha(& _pilha);
-    gotoxy(9, 13);textcolor(WHITE); printf("[TOPO DA PILHA]\t: %c\n", _pilha.dados[ _pilha.topo ]);
+    gotoxy(9, 12);textcolor(BLUE);  print_pilha(&_pilha);
+
+    char topo;
+    if (pilha_topo(&_pilha, &topo))
+    {
+        gotoxy(9, 13);textcolor(WHITE); printf("[TOPO DA PILHA]\t: %c\n", topo);
+    }
         
     char valor;
     if (pilha_desempilhar(&_pilha, &valor)) 
