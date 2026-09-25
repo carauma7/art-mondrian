@@ -21,6 +21,7 @@ Aluno *alunos_maiorMedia ( Aluno **inicio );
 Aluno *alunos_menorMedia ( Aluno **inicio );
 Aluno *alunos_maiorNota ( Aluno **inicio );
 Aluno *alunos_menorNota ( Aluno **inicio );
+Aluno *alunos_concatenar ( Aluno **listaA, Aluno **listaB );
 
 
 #endif /* PROBLEM_7_H */

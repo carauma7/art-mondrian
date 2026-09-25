@@ -36,10 +36,27 @@ void problem_72(void)
 {
     draw_problem_screen( 5 , ( const char * ) ascii_problema_72 );
     //----------------------------------------------------
+    Aluno *alunosA;
+    Aluno *alunosB;
 
+    alunos_inicializar ( &alunosA );
+    alunos_inicializar ( &alunosB );
+
+    alunos_cadastrar ( &alunosA, "A. Toa    ",  7.12, 8.34, 9.01);
+    alunos_cadastrar ( &alunosA, "B. B. Cana",  6.78, 7.89, 8.12);
+    alunos_cadastrar ( &alunosB, "A. Tordoada", 8.76, 7.65, 9.78);
+    
+    alunos_imprimir ( &alunosA, 9, 11 );
+    alunos_imprimir ( &alunosB, 9, 14 );
+    
     textcolor(GREEN);textbackground(BLACK);
-    gotoxy(9, 12); printf("Digite o número de crianças (n)");
-    gotoxy(9, 13); printf("ou 'sair' para encerrar.");
+    Aluno *concatenada = alunos_concatenar(&alunosA, &alunosB);
+    alunos_imprimir(&concatenada, 9, 17);
+
+    // A lista concatenada agora e a dona de todos os nos.
+    alunosA = NULL;
+    alunosB = NULL;
+    alunos_apagarTudo ( &concatenada );
 
     //---------------------------------------------------
     waitEsc();

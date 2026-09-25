@@ -38,7 +38,10 @@ void alunos_inicializar ( Aluno **inicio )
 
 void alunos_apagarTudo ( Aluno **inicio )
 {
+    if ( inicio == NULL || *inicio == NULL ) return;
+    
     Aluno *atual = *inicio;
+
     while ( atual != NULL ) {
         Aluno *proximo = atual->proximo;
         free(atual);
@@ -231,6 +234,23 @@ Aluno *alunos_menorNota ( Aluno **inicio )
         atual = atual->proximo;
     }
     return menor;
+}
+
+Aluno *alunos_concatenar ( Aluno **listaA, Aluno **listaB )
+{
+    if (listaA == NULL || listaB == NULL) return NULL;
+    if (*listaA == NULL) {
+        *listaA = *listaB;
+        return *listaA;
+    }
+    if (*listaB == NULL) return *listaA;
+
+    Aluno *atual = *listaA;
+    while (atual->proximo != NULL) {
+        atual = atual->proximo;
+    }
+    atual->proximo = *listaB;
+    return *listaA;
 }
 
 void problem_7(void)
