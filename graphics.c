@@ -94,6 +94,7 @@ static void draw_paint_entering(void)
     unsigned int frame_delay_ms;
     unsigned int total_frames;
     unsigned int sunrise_duration_ms;
+    unsigned int animation_duration_ms;
     unsigned int *line_starts;
     unsigned int *line_lengths;
     unsigned int *line_color_starts;
@@ -116,8 +117,11 @@ static void draw_paint_entering(void)
 
     total_frames = line_count + SCREEN_HEIGHT + 1;
     sunrise_duration_ms = audio_get_duration_ms(audio_mainchannel);
-    frame_delay_ms = sunrise_duration_ms > 0
-        ? sunrise_duration_ms / total_frames
+    animation_duration_ms = sunrise_duration_ms > 1000
+        ? sunrise_duration_ms - 1000
+        : sunrise_duration_ms;
+    frame_delay_ms = animation_duration_ms > 0
+        ? animation_duration_ms / total_frames
         : 80;
     if (frame_delay_ms == 0)
     {
@@ -154,11 +158,20 @@ static void draw_paint_entering(void)
         }
     }
 
+    // O mapa RGB é indexado por caractere UTF-8, não por byte
     line_color_starts[0] = 0;
     for (line = 1; line < line_count; line++)
     {
-        line_color_starts[line] =
-            line_color_starts[line - 1] + line_lengths[line - 1];
+        unsigned int chars_in_line = 0;
+
+        for (position = 0; position < line_lengths[line - 1]; position++)
+        {
+            if ((ascii_paint[line_starts[line - 1] + position] & 0xC0) != 0x80)
+            {
+                chars_in_line++;
+            }
+        }
+        line_color_starts[line] = line_color_starts[line - 1] + chars_in_line;
     }
 
     memset(blank_line, ' ', sizeof(blank_line));
@@ -184,18 +197,26 @@ static void draw_paint_entering(void)
                 continue;
             }
 
-            for (position = 0; position < line_lengths[source_line]; position++)
+            unsigned int color_index = line_color_starts[source_line];
+
+            position = 0;
+            while (position < line_lengths[source_line])
             {
-                unsigned int rgb =
-                    ascii_paint_rgb[line_color_starts[source_line] + position];
+                const unsigned char *glyph =
+                    ascii_paint + line_starts[source_line] + position;
+                unsigned int glyph_bytes =
+                    (*glyph < 0x80) ? 1 : (*glyph < 0xE0) ? 2 :
+                    (*glyph < 0xF0) ? 3 : 4;
+                unsigned int rgb = ascii_paint_rgb[color_index++];
 
                 fb_append(
                     &frame_buffer,
-                    "\033[38;2;%u;%u;%um%c",
+                    "\033[38;2;%u;%u;%um",
                     (rgb >> 16) & 0xFF,
                     (rgb >> 8) & 0xFF,
-                    rgb & 0xFF,
-                    ascii_paint[line_starts[source_line] + position]);
+                    rgb & 0xFF);
+                fb_putbytes(&frame_buffer, (const char *) glyph, glyph_bytes);
+                position += glyph_bytes;
             }
             fb_append(&frame_buffer, "\033[0m");
         }
@@ -211,20 +232,29 @@ static void draw_paint_entering(void)
 
 static void draw_roraima_entering(void)
 {
-    const unsigned int frame_delay_ms = 50;
     const unsigned int target_top =
         (SCREEN_HEIGHT - ascii_roraima_lines) / 2;
+    const unsigned int frame_delay_ms = 40;
     unsigned int row;
     unsigned int epic_duration_ms;
+    unsigned int active_duration_ms;
+    DWORD epic_start_tick;
     char blank_line[SCREEN_WIDTH];
     FrameBuf frame_buffer;
     int offset;
+
+    audio_play(&audio_mainchannel, AUDIO_EPIC, FALSE);
+    epic_duration_ms = audio_get_duration_ms(audio_mainchannel);
+    active_duration_ms = epic_duration_ms > 1000
+        ? epic_duration_ms - 1000
+        : epic_duration_ms;
 
     memset(blank_line, ' ', sizeof(blank_line));
     fb_reserve(
         &frame_buffer,
         SCREEN_HEIGHT * (SCREEN_WIDTH * 32 + 32) + 32);
 
+    epic_start_tick = GetTickCount();
     for (offset = -(int) ascii_roraima_lines;
          offset <= (int) target_top;
          offset++)
@@ -262,9 +292,15 @@ static void draw_roraima_entering(void)
         delay(frame_delay_ms);
     }
 
-    audio_play(&audio_mainchannel, AUDIO_EPIC, FALSE);
-    epic_duration_ms = audio_get_duration_ms(audio_mainchannel);
-    delay(epic_duration_ms > 0 ? epic_duration_ms : 1000);
+    if (active_duration_ms > 0)
+    {
+        DWORD elapsed_ms = GetTickCount() - epic_start_tick;
+
+        if (elapsed_ms < active_duration_ms)
+        {
+            delay(active_duration_ms - elapsed_ms);
+        }
+    }
 
     free(frame_buffer.buf);
 }
