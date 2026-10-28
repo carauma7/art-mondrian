@@ -22,6 +22,8 @@
 #define AUDIO_INTRO				"audio/intro.mp3"
 #define AUDIO_MENU_MAIN 		"audio/mainmenu.mp3"
 #define AUDIO_DJANGO			"audio/django.mp3"
+#define AUDIO_SUNRISE            "audio/sunrise.mp3"
+#define AUDIO_EPIC               "audio/epic.mp3"
 #define AUDIO_TEFX_ADDCHAR		"audio/addchar.mp3"
 #define AUDIO_TEFX_SLIDING		"audio/sliding.mp3"
 #define AUDIO_TEFX_SLIDINGTOC	"audio/slidingtoc.mp3"
@@ -69,6 +71,7 @@ void audio_terminate(void);
 int audio_play(unsigned long int *audiochannel, char *filename, short repeat);
 int audio_is_playing(unsigned long int audiochannel);
 int audio_is_track_playing(const char *filename);
+unsigned int audio_get_duration_ms(unsigned long int audiochannel);
 int audio_play_map(int level);
 void audio_stop(void);
 void audio_resume(void);

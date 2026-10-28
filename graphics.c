@@ -9,6 +9,8 @@
 #include "graphics.h"
 #include "utils.h"
 #include "ascii/django.h"
+#include "ascii/paint.h"
+#include "ascii/roraima.h"
 #include "ascii/ufrr.h"
 #include "ascii/turndownforwhat1.h"
 #include "ascii/goodbye.h"
@@ -83,6 +85,189 @@ static void fb_flush(FrameBuf *fb)
 
 // Repinta uma célula do fundo de céu nublado (definida mais abaixo no arquivo)
 static void cloudy_sky_restore_cell(FrameBuf *fb, int x, int y);
+
+static void draw_paint_entering(void)
+{
+    unsigned int line_count = 0;
+    unsigned int line;
+    unsigned int position;
+    unsigned int frame_delay_ms;
+    unsigned int total_frames;
+    unsigned int sunrise_duration_ms;
+    unsigned int *line_starts;
+    unsigned int *line_lengths;
+    unsigned int *line_color_starts;
+    char blank_line[SCREEN_WIDTH];
+    FrameBuf frame_buffer;
+    int offset;
+
+    for (position = 0; position < ascii_paint_length; position++)
+    {
+        if (ascii_paint[position] == '\n')
+        {
+            line_count++;
+        }
+    }
+    if (ascii_paint_length > 0 &&
+        ascii_paint[ascii_paint_length - 1] != '\n')
+    {
+        line_count++;
+    }
+
+    total_frames = line_count + SCREEN_HEIGHT + 1;
+    sunrise_duration_ms = audio_get_duration_ms(audio_mainchannel);
+    frame_delay_ms = sunrise_duration_ms > 0
+        ? sunrise_duration_ms / total_frames
+        : 80;
+    if (frame_delay_ms == 0)
+    {
+        frame_delay_ms = 1;
+    }
+
+    line_starts = (unsigned int *) malloc(line_count * sizeof(*line_starts));
+    line_lengths = (unsigned int *) malloc(line_count * sizeof(*line_lengths));
+    line_color_starts = (unsigned int *) malloc(line_count * sizeof(*line_color_starts));
+    if (line_starts == NULL || line_lengths == NULL || line_color_starts == NULL)
+    {
+        free(line_starts);
+        free(line_lengths);
+        free(line_color_starts);
+        return;
+    }
+
+    line = 0;
+    position = 0;
+    while (line < line_count)
+    {
+        unsigned int line_start = position;
+
+        while (position < ascii_paint_length && ascii_paint[position] != '\n')
+        {
+            position++;
+        }
+        line_starts[line] = line_start;
+        line_lengths[line] = position - line_start;
+        line++;
+        if (position < ascii_paint_length)
+        {
+            position++;
+        }
+    }
+
+    line_color_starts[0] = 0;
+    for (line = 1; line < line_count; line++)
+    {
+        line_color_starts[line] =
+            line_color_starts[line - 1] + line_lengths[line - 1];
+    }
+
+    memset(blank_line, ' ', sizeof(blank_line));
+    fb_reserve(
+        &frame_buffer,
+        SCREEN_HEIGHT * (SCREEN_WIDTH * 32 + 32) + 32);
+
+    /*
+     * A pintura é maior que a tela. Ela começa acima da janela, com a
+     * última linha aparecendo primeiro, e desce até sair pelo rodapé.
+     */
+    for (offset = -(int) line_count; offset <= SCREEN_HEIGHT; offset++)
+    {
+        fb_append(&frame_buffer, "\033[0m\033[H");
+        for (line = 0; line < SCREEN_HEIGHT; line++)
+        {
+            int source_line = (int) line - offset;
+
+            fb_append(&frame_buffer, "\033[%u;1H", line + 1);
+            if (source_line < 0 || source_line >= (int) line_count)
+            {
+                fb_putbytes(&frame_buffer, blank_line, sizeof(blank_line));
+                continue;
+            }
+
+            for (position = 0; position < line_lengths[source_line]; position++)
+            {
+                unsigned int rgb =
+                    ascii_paint_rgb[line_color_starts[source_line] + position];
+
+                fb_append(
+                    &frame_buffer,
+                    "\033[38;2;%u;%u;%um%c",
+                    (rgb >> 16) & 0xFF,
+                    (rgb >> 8) & 0xFF,
+                    rgb & 0xFF,
+                    ascii_paint[line_starts[source_line] + position]);
+            }
+            fb_append(&frame_buffer, "\033[0m");
+        }
+        fb_flush(&frame_buffer);
+        delay(frame_delay_ms);
+    }
+
+    free(frame_buffer.buf);
+    free(line_starts);
+    free(line_lengths);
+    free(line_color_starts);
+}
+
+static void draw_roraima_entering(void)
+{
+    const unsigned int frame_delay_ms = 50;
+    const unsigned int target_top =
+        (SCREEN_HEIGHT - ascii_roraima_lines) / 2;
+    unsigned int row;
+    unsigned int epic_duration_ms;
+    char blank_line[SCREEN_WIDTH];
+    FrameBuf frame_buffer;
+    int offset;
+
+    memset(blank_line, ' ', sizeof(blank_line));
+    fb_reserve(
+        &frame_buffer,
+        SCREEN_HEIGHT * (SCREEN_WIDTH * 32 + 32) + 32);
+
+    for (offset = -(int) ascii_roraima_lines;
+         offset <= (int) target_top;
+         offset++)
+    {
+        fb_append(&frame_buffer, "\033[0m\033[H");
+        for (row = 0; row < SCREEN_HEIGHT; row++)
+        {
+            int source_line = (int) row - offset;
+
+            fb_append(&frame_buffer, "\033[%u;1H", row + 1);
+            if (source_line >= 0 &&
+                source_line < (int) ascii_roraima_lines)
+            {
+                unsigned int left_padding =
+                    (SCREEN_WIDTH - ascii_roraima_width[source_line]) / 2;
+
+                fb_append(
+                    &frame_buffer,
+                    "\033[%u;%uH%s",
+                    row + 1,
+                    left_padding + 1,
+                    ascii_roraima[source_line]);
+                fb_putbytes(
+                    &frame_buffer,
+                    blank_line,
+                    SCREEN_WIDTH - left_padding -
+                        ascii_roraima_width[source_line]);
+            }
+            else
+            {
+                fb_putbytes(&frame_buffer, blank_line, sizeof(blank_line));
+            }
+        }
+        fb_flush(&frame_buffer);
+        delay(frame_delay_ms);
+    }
+
+    audio_play(&audio_mainchannel, AUDIO_EPIC, FALSE);
+    epic_duration_ms = audio_get_duration_ms(audio_mainchannel);
+    delay(epic_duration_ms > 0 ? epic_duration_ms : 1000);
+
+    free(frame_buffer.buf);
+}
 
 MenuItem menu_items[MENU_MAIN_CAPACITY];
 int menu_item_count = 0;
@@ -631,6 +816,14 @@ int draw_welcome(void)
         delay(300);
     }    
     delay(500);  
+
+    // Pintura ASCII: entra pelo topo enquanto o sunrise é reproduzido.
+    audio_play(&audio_mainchannel, AUDIO_SUNRISE, FALSE);
+    draw_paint_entering();
+    delay(500);
+
+    // RORAIMA: desce até o centro e permanece visível durante o epic.
+    draw_roraima_entering();
 
     // Turn Down For What (One)
     //textScrolling(

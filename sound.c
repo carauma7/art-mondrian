@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "main.h"
 #include "sound.h"
 #include "utils.h"
@@ -160,6 +161,26 @@ int audio_is_track_playing(const char *filename)
 	#endif
 
 	return(audio_is_playing(audio_mainchannel) && strcmp(last_track, filename) == 0);
+}
+
+unsigned int audio_get_duration_ms(unsigned long int audiochannel)
+{
+	QWORD length;
+	double seconds;
+
+	#ifdef SOUND_OFF
+		(void) audiochannel;
+		return(0);
+	#endif
+
+	length = BASS_ChannelGetLength(audiochannel, BASS_POS_BYTE);
+	seconds = BASS_ChannelBytes2Seconds(audiochannel, length);
+	if (seconds <= 0.0 || seconds >= (double) UINT_MAX / 1000.0)
+	{
+		return(0);
+	}
+
+	return((unsigned int) (seconds * 1000.0));
 }
 
 // Habilita reprodução de áudio
