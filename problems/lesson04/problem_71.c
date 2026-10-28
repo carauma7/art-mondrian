@@ -45,7 +45,7 @@ void problem_71(void)
     alunos_imprimir ( &alunos, 9, 11 );
     
     textcolor(BLUE);textbackground(BLACK);
-    gotoxy(9, 15); printf("Lista possui '%d' alunos.", alunos_totalDeAlunos(&alunos));
+    gotoxy(9, 15); printf("A lista possui '%d' alunos. Logo, não está vazia.", alunos_totalDeAlunos(&alunos));
 
     textcolor(GREEN);textbackground(BLACK);        
     gotoxy(9, 16); printf("Aluno com maior média: %s, com nota %.2f.", alunos_maiorMedia(&alunos)->nome, (alunos_maiorMedia(&alunos)->notas[0] + alunos_maiorMedia(&alunos)->notas[1] + alunos_maiorMedia(&alunos)->notas[2]) / 3.0);
