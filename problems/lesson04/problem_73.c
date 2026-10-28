@@ -40,9 +40,26 @@ void problem_73(void)
     draw_problem_screen( 5 , ( const char * ) ascii_problema_73 );
     //----------------------------------------------------
 
+    Aluno *alunosA;
+    Aluno *alunosB;
+
+    alunos_inicializar ( &alunosA );
+    alunos_inicializar ( &alunosB );
+
+    alunos_cadastrar ( &alunosA, "A. Toa    ", 7.12, 8.34, 9.01);
+    alunos_cadastrar ( &alunosA, "B. B. Cana", 6.78, 7.89, 8.12);
+
+    alunos_cadastrar ( &alunosB, "A. Toa    ", 7.12, 8.34, 9.01);
+    alunos_cadastrar ( &alunosB, "B. B. Cana", 6.78, 7.89, 8.12);
+
+    alunos_imprimir ( &alunosA, 9, 12 );
+    alunos_imprimir ( &alunosB, 9, 15 );
+
     textcolor(GREEN);textbackground(BLACK);
-    gotoxy(9, 13); printf("Digite o número de crianças (n)");
-    gotoxy(9, 14); printf("ou 'sair' para encerrar.");
+    gotoxy(9, 19); printf("As listas possuem os mesmos nomes e a mesma ordem? %d (verdadeiro)", alunos_comparar(&alunosA, &alunosB));
+
+    alunos_apagarTudo ( &alunosA );
+    alunos_apagarTudo ( &alunosB );
 
     //---------------------------------------------------
     waitEsc();

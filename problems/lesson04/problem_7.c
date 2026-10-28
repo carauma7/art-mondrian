@@ -253,6 +253,24 @@ Aluno *alunos_concatenar ( Aluno **listaA, Aluno **listaB )
     return *listaA;
 }
 
+int alunos_comparar ( Aluno **listaA, Aluno **listaB )
+{
+    if (listaA == NULL || listaB == NULL) return 0;
+
+    Aluno *atualA = *listaA;
+    Aluno *atualB = *listaB;
+
+    while (atualA != NULL && atualB != NULL)
+    {
+        if (strcmp(atualA->nome, atualB->nome) != 0) return 0;
+
+        atualA = atualA->proximo;
+        atualB = atualB->proximo;
+    }
+
+    return atualA == NULL && atualB == NULL;
+}
+
 void problem_7(void)
 {
     draw_problem_screen( 4 , ( const char * ) ascii_problema_7 );
