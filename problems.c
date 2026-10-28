@@ -59,16 +59,23 @@ void initialize_menu_items(void)
     menu_add_item("         ", "··································",                 "",          NULL);
     menu_add_item("         ", "· Surpresa: Calculadora de Derivadas", "", devcalcRun);
     menu_add_item("         ", "· Surpresa: Jogo da Cobrinha", "", run_cobra);
+    menu_add_item("         ", "· Sair", "", NULL);
 }
 
-void run_selected_problem(int selected)
+int run_selected_problem(int selected)
 {
+    if (selected == menu_item_count)
+    {
+        return 1;
+    }
+
     if (selected >= 1 && selected <= menu_item_count && menu_items[selected - 1].action != NULL)
     {
         menu_items[selected - 1].action();
-        return;
+        return 0;
     }
 
     draw_content_placeholder(selected);
     waitEsc();
+    return 0;
 }

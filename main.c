@@ -93,9 +93,17 @@
       if (keypressed.x == 10)
       {
          audio_play(&audio_effectchannel, AUDIO_CONFIRM_SELECTION, FALSE);
-         run_selected_problem(MenuSelected);
-         draw_menu();
-         draw_menu_items(MenuIndex, MenuSelected);
+         if (run_selected_problem(MenuSelected))
+         {
+            WE_ARE_ALIVE = false;
+         }
+         else
+         {
+            audio_initialize();
+            audio_play(&audio_effectchannel, AUDIO_CONFIRM_SELECTION, FALSE);
+            draw_menu();
+            draw_menu_items(MenuIndex, MenuSelected);
+         }
       }
 
       // Usuário pressionou a tecla "Ctrl + X" (Sair)
@@ -108,6 +116,7 @@
    // Imprime animação de finalização
    #ifdef RELEASE_VERSION
    draw_goodbye();
+   draw_happy();
    #endif
 
    return (0);

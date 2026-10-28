@@ -12,6 +12,7 @@
 #include "ascii/ufrr.h"
 #include "ascii/turndownforwhat1.h"
 #include "ascii/goodbye.h"
+#include "ascii/happy.h"
 #include "sound.h"
 
 /*
@@ -686,7 +687,6 @@ int draw_goodbye(void)
                 continue;
             }
 
-            // caractere UTF-8 de 3 bytes (blocos ▓ ▒ ░ █ ▄ ▀ etc.)
             gotoxy(x, y);
             if (i % 2 == 0)
             {
@@ -694,11 +694,18 @@ int draw_goodbye(void)
             } else {
                 textcolor(CYAN);
             }
-            // se o valor armazenado em i é número PAR                        
-            putchar(c);
-            putchar(ascii_goodbye[idx + 1]);
-            putchar(ascii_goodbye[idx + 2]);
-            idx += 3;
+            if (c >= 0xC0)
+            {
+                putchar(c);
+                putchar(ascii_goodbye[idx + 1]);
+                putchar(ascii_goodbye[idx + 2]);
+                idx += 3;
+            }
+            else
+            {
+                putchar(c);
+                idx++;
+            }
             x++;
         }
         fflush(stdout);
@@ -712,6 +719,71 @@ int draw_goodbye(void)
     {
         usleep(100000);
     }
+
+    clrscr();
+    gotoxy(SCREEN_WIDTH, SCREEN_HEIGHT);
+    return (0);
+}
+
+int draw_happy(void)
+{
+    static const int mondrian_colors[] = { RED, BLUE, YELLOW, WHITE };
+    const int mondrian_color_count =
+        (int)(sizeof(mondrian_colors) / sizeof(mondrian_colors[0]));
+    int frame = 0;
+    unsigned int idx;
+    unsigned int size = (unsigned int) strlen((const char *) ascii_happy);
+    int x, y;
+    int base_x = 2, base_y = 9;
+
+    draw_mondrian();
+
+    audio_initialize();
+    audio_play(&audio_mainchannel, AUDIO_BELLS, FALSE);
+
+    do
+    {
+        textbackground(BLACK);
+        x = base_x;
+        y = base_y;
+
+        for (idx = 0; idx < size; idx++)
+        {
+            unsigned char c = ascii_happy[idx];
+
+            if (c == '\n')
+            {
+                x = base_x;
+                y++;
+                continue;
+            }
+
+            if (c == ' ')
+            {
+                x++;
+                continue;
+            }
+
+            gotoxy(x, y);
+            textcolor(mondrian_colors[frame % mondrian_color_count]);
+            if (c >= 0xC0)
+            {
+                putchar(c);
+                putchar(ascii_happy[idx + 1]);
+                putchar(ascii_happy[idx + 2]);
+                idx += 2;
+            }
+            else
+            {
+                putchar(c);
+            }
+            x++;
+        }
+
+        fflush(stdout);
+        frame++;
+        usleep(100000);
+    } while (audio_is_playing(audio_mainchannel));
 
     clrscr();
     gotoxy(SCREEN_WIDTH, SCREEN_HEIGHT);

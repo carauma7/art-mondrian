@@ -40,6 +40,7 @@ unsigned long int audio_gameover_voicechannel;
 
 // Nome do último arquivo tocado no canal principal, usado por audio_is_track_playing
 static char last_track[256] = "";
+static int audio_initialized = 0;
 
 #define MAP_TRACK_COUNT 10
 #define MAP_FADE_STEPS 8
@@ -90,8 +91,11 @@ int audio_play(unsigned long int *audiochannel, char *filename, short repeat)
 	} else {
 		*audiochannel = new_channel;
 
-		strncpy(last_track, filename, sizeof(last_track) - 1);
-		last_track[sizeof(last_track) - 1] = '\0';
+		if (audiochannel == &audio_mainchannel)
+		{
+			strncpy(last_track, filename, sizeof(last_track) - 1);
+			last_track[sizeof(last_track) - 1] = '\0';
+		}
 
 		// Inicia reprodução do áudio...
 		BASS_ChannelPlay(*audiochannel, FALSE);
@@ -175,6 +179,11 @@ int audio_initialize(void)
 		return(BASS_OK);
 	#endif
 
+	if (audio_initialized)
+	{
+		return(BASS_OK);
+	}
+
 	// Verifica se foi carregada uma versão correta da biblioteca BASS
 	if (HIWORD(BASS_GetVersion()) != BASSVERSION)
 	{
@@ -185,6 +194,8 @@ int audio_initialize(void)
 	{
 		return(BASS_ERROR_INIT);
 	}
+
+	audio_initialized = 1;
 	return(BASS_OK);
 }
 
@@ -196,4 +207,7 @@ void audio_terminate(void)
 	#endif
 
 	BASS_Free();
+	audio_initialized = 0;
+	audio_mainchannel = 0;
+	last_track[0] = '\0';
 }

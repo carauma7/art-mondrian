@@ -143,6 +143,12 @@ int draw_welcome(void);
 int draw_goodbye(void);
 
 /*
+ * Função para exibir a mensagem de Natal no console.
+ * @return: Retorna 0 em caso de sucesso.
+ */
+int draw_happy(void);
+
+/*
  * Função para exibir o menu principal no console.
  */
 void draw_menu(void);
