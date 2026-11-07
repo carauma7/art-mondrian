@@ -15,6 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "main.h"
 #include "sound.h"
 #include "utils.h"
@@ -43,6 +46,97 @@ unsigned long int audio_gameover_voicechannel;
 #ifndef SOUND_OFF
 static char last_track[256] = "";
 static int audio_initialized = 0;
+static HMODULE audio_library = NULL;
+
+typedef DWORD (WINAPI *BASSGetVersionFn)(void);
+typedef BOOL (WINAPI *BASSInitFn)(int, DWORD, DWORD, HWND, const GUID *);
+typedef BOOL (WINAPI *BASSFreeFn)(void);
+typedef BOOL (WINAPI *BASSStartFn)(void);
+typedef BOOL (WINAPI *BASSStopFn)(void);
+typedef HSTREAM (WINAPI *BASSStreamCreateFileFn)(BOOL, const void *, QWORD, QWORD, DWORD);
+typedef BOOL (WINAPI *BASSChannelStopFn)(DWORD);
+typedef BOOL (WINAPI *BASSChannelPlayFn)(DWORD, BOOL);
+typedef BOOL (WINAPI *BASSChannelSetAttributeFn)(DWORD, DWORD, float);
+typedef DWORD (WINAPI *BASSChannelIsActiveFn)(DWORD);
+typedef QWORD (WINAPI *BASSChannelGetLengthFn)(DWORD, DWORD);
+typedef double (WINAPI *BASSChannelBytes2SecondsFn)(DWORD, QWORD);
+
+typedef struct
+{
+	BASSGetVersionFn get_version;
+	BASSInitFn init;
+	BASSFreeFn free;
+	BASSStartFn start;
+	BASSStopFn stop;
+	BASSStreamCreateFileFn stream_create_file;
+	BASSChannelStopFn channel_stop;
+	BASSChannelPlayFn channel_play;
+	BASSChannelSetAttributeFn channel_set_attribute;
+	BASSChannelIsActiveFn channel_is_active;
+	BASSChannelGetLengthFn channel_get_length;
+	BASSChannelBytes2SecondsFn channel_bytes_to_seconds;
+} BASSApi;
+
+static BASSApi bass_api;
+
+static void audio_unload_library(void)
+{
+	if (audio_library)
+	{
+		FreeLibrary(audio_library);
+		audio_library = NULL;
+	}
+	memset(&bass_api, 0, sizeof(bass_api));
+}
+
+static int audio_load_library(void)
+{
+	if (audio_library)
+	{
+		return(TRUE);
+	}
+
+	audio_library = LoadLibraryA("bass.dll");
+	if (!audio_library)
+	{
+		audio_library = LoadLibraryA("lib\\bass.dll");
+	}
+	if (!audio_library)
+	{
+		return(FALSE);
+	}
+
+#define LOAD_BASS_API(member, symbol) \
+	do { \
+		FARPROC function = GetProcAddress(audio_library, symbol); \
+		memcpy(&bass_api.member, &function, sizeof(bass_api.member)); \
+	} while (0)
+	LOAD_BASS_API(get_version, "BASS_GetVersion");
+	LOAD_BASS_API(init, "BASS_Init");
+	LOAD_BASS_API(free, "BASS_Free");
+	LOAD_BASS_API(start, "BASS_Start");
+	LOAD_BASS_API(stop, "BASS_Stop");
+	LOAD_BASS_API(stream_create_file, "BASS_StreamCreateFile");
+	LOAD_BASS_API(channel_stop, "BASS_ChannelStop");
+	LOAD_BASS_API(channel_play, "BASS_ChannelPlay");
+	LOAD_BASS_API(channel_set_attribute, "BASS_ChannelSetAttribute");
+	LOAD_BASS_API(channel_is_active, "BASS_ChannelIsActive");
+	LOAD_BASS_API(channel_get_length, "BASS_ChannelGetLength");
+	LOAD_BASS_API(channel_bytes_to_seconds, "BASS_ChannelBytes2Seconds");
+#undef LOAD_BASS_API
+
+	if (!bass_api.get_version || !bass_api.init || !bass_api.free ||
+		!bass_api.start || !bass_api.stop || !bass_api.stream_create_file ||
+		!bass_api.channel_stop || !bass_api.channel_play ||
+		!bass_api.channel_set_attribute || !bass_api.channel_is_active ||
+		!bass_api.channel_get_length || !bass_api.channel_bytes_to_seconds)
+	{
+		audio_unload_library();
+		return(FALSE);
+	}
+
+	return(TRUE);
+}
 
 #define MAP_TRACK_COUNT 10
 #define MAP_FADE_STEPS 8
@@ -62,7 +156,7 @@ static void audio_fade_volume(unsigned long int channel, float from, float to)
 		float progress = (float) step / MAP_FADE_STEPS;
 		float volume = from + (to - from) * progress;
 
-		BASS_ChannelSetAttribute(channel, BASS_ATTRIB_VOL, volume);
+		bass_api.channel_set_attribute(channel, BASS_ATTRIB_VOL, volume);
 		delay(MAP_FADE_STEP_MS);
 	}
 }
@@ -81,9 +175,14 @@ int audio_play(unsigned long int *audiochannel, char *filename, short repeat)
 	#else
 	unsigned long int new_channel;
 
-	BASS_ChannelStop(*audiochannel);
+	if (!audio_initialized)
+	{
+		return(EXIT_SUCCESS);
+	}
 
-	if(!(new_channel = BASS_StreamCreateFile(
+	bass_api.channel_stop(*audiochannel);
+
+	if(!(new_channel = bass_api.stream_create_file(
 		FALSE, filename, 0, 0, repeat ? BASS_SAMPLE_LOOP : 0)))
 //	&&if(!(new_channel = BASS_MusicLoad(
 //		FALSE, filename, 0, 0, BASS_MUSIC_RAMP | BASS_SAMPLE_FLOAT | (BASS_SAMPLE_LOOP && repeat), 1)))
@@ -100,7 +199,7 @@ int audio_play(unsigned long int *audiochannel, char *filename, short repeat)
 		}
 
 		// Inicia reprodução do áudio...
-		BASS_ChannelPlay(*audiochannel, FALSE);
+		bass_api.channel_play(*audiochannel, FALSE);
 	}
 	return(EXIT_SUCCESS);
 	#endif
@@ -116,6 +215,11 @@ int audio_play_map(int level)
 	#else
 	int track_index = (level - 1) % MAP_TRACK_COUNT;
 
+	if (!audio_initialized)
+	{
+		return(EXIT_SUCCESS);
+	}
+
 	if (audio_mainchannel)
 	{
 		audio_fade_volume(audio_mainchannel, 1.0f, 0.0f);
@@ -126,7 +230,7 @@ int audio_play_map(int level)
 		return(EXIT_FAILURE);
 	}
 
-	BASS_ChannelSetAttribute(audio_mainchannel, BASS_ATTRIB_VOL, 0.0f);
+	bass_api.channel_set_attribute(audio_mainchannel, BASS_ATTRIB_VOL, 0.0f);
 	audio_fade_volume(audio_mainchannel, 0.0f, 1.0f);
 
 	return(EXIT_SUCCESS);
@@ -139,7 +243,10 @@ void audio_stop(void)
 	#ifdef SOUND_OFF
 		return;
 	#else
-	BASS_Stop();
+	if (audio_initialized)
+	{
+		bass_api.stop();
+	}
 	#endif
 }
 
@@ -150,7 +257,8 @@ int audio_is_playing(unsigned long int audiochannel)
 		(void) audiochannel;
 		return(FALSE);
 	#else
-	return(BASS_ChannelIsActive(audiochannel) == BASS_ACTIVE_PLAYING);
+	return(audio_initialized &&
+		bass_api.channel_is_active(audiochannel) == BASS_ACTIVE_PLAYING);
 	#endif
 }
 
@@ -171,11 +279,16 @@ unsigned int audio_get_duration_ms(unsigned long int audiochannel)
 		(void) audiochannel;
 		return(0);
 	#else
+	if (!audio_initialized)
+	{
+		return(0);
+	}
+
 	QWORD length;
 	double seconds;
 
-	length = BASS_ChannelGetLength(audiochannel, BASS_POS_BYTE);
-	seconds = BASS_ChannelBytes2Seconds(audiochannel, length);
+	length = bass_api.channel_get_length(audiochannel, BASS_POS_BYTE);
+	seconds = bass_api.channel_bytes_to_seconds(audiochannel, length);
 	if (seconds <= 0.0 || seconds >= (double) UINT_MAX / 1000.0)
 	{
 		return(0);
@@ -191,7 +304,10 @@ void audio_resume(void)
 	#ifdef SOUND_OFF
 		return;
 	#else
-	BASS_Start();
+	if (audio_initialized)
+	{
+		bass_api.start();
+	}
 	#endif
 }
 
@@ -206,14 +322,21 @@ int audio_initialize(void)
 		return(BASS_OK);
 	}
 
-	// Verifica se foi carregada uma versão correta da biblioteca BASS
-	if (HIWORD(BASS_GetVersion()) != BASSVERSION)
+	if (!audio_load_library())
 	{
+		return(BASS_ERROR_INIT);
+	}
+
+	// Verifica se foi carregada uma versão correta da biblioteca BASS
+	if (HIWORD(bass_api.get_version()) != BASSVERSION)
+	{
+		audio_unload_library();
 		return(BASS_ERROR_VERSION);
 	}
 	// Inicializa a biblioteca BASS
-	if (!BASS_Init(-1, 44100, 0, NULL, NULL)) 
+	if (!bass_api.init(-1, 44100, 0, NULL, NULL))
 	{
+		audio_unload_library();
 		return(BASS_ERROR_INIT);
 	}
 
@@ -228,9 +351,13 @@ void audio_terminate(void)
 	#ifdef SOUND_OFF
 		return;
 	#else
-	BASS_Free();
-	audio_initialized = 0;
-	audio_mainchannel = 0;
-	last_track[0] = '\0';
+	if (audio_initialized)
+	{
+		bass_api.free();
+		audio_initialized = 0;
+		audio_mainchannel = 0;
+		last_track[0] = '\0';
+	}
+	audio_unload_library();
 	#endif
 }

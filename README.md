@@ -27,20 +27,13 @@ Este repositório reúne uma série de exercícios e mini-aplicativos em console
 No ambiente Windows/MinGW, use:
 
 ```bash
-make
+mingw32-make
 main.exe
 ```
 
-Para compilar e executar sem a biblioteca de áudio BASS:
-
-```bash
-mingw32-make clean
-mingw32-make SOUND_OFF=1
-main.exe
-```
-
-Nesse modo, o programa continua funcionando sem reproduzir sons. O modo padrão
-continua incluindo o suporte a áudio.
+O áudio é opcional: se a biblioteca BASS (`bass.dll`) estiver disponível junto
+do executável, na pasta `lib` ou no PATH, os sons serão reproduzidos. Se não
+estiver, o programa inicia e funciona sem áudio.
 
 O programa é navegável pelo teclado:
 
