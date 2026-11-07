@@ -4,7 +4,7 @@ Projeto em C para estudo de estruturas de dados e lógica de programação, com 
 
 <img width="738" height="521" alt="image" src="https://github.com/user-attachments/assets/ff1d4d5b-336b-43b2-adea-a8467d4cc10a" />
 
-## O que é
+## O que é?
 
 Este repositório reúne uma série de exercícios e mini-aplicativos em console, organizados por menu, com foco em:
 
