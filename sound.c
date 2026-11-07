@@ -40,6 +40,7 @@ unsigned long int audio_gameover_musicchannel;
 unsigned long int audio_gameover_voicechannel;
 
 // Nome do último arquivo tocado no canal principal, usado por audio_is_track_playing
+#ifndef SOUND_OFF
 static char last_track[256] = "";
 static int audio_initialized = 0;
 
@@ -65,6 +66,7 @@ static void audio_fade_volume(unsigned long int channel, float from, float to)
 		delay(MAP_FADE_STEP_MS);
 	}
 }
+#endif
 
 // Reproduz o áudio correspondente ao arquivo dado, atualizando *audiochannel
 // com o handle do novo stream (senão o handle antigo é perdido e o canal
@@ -76,8 +78,7 @@ int audio_play(unsigned long int *audiochannel, char *filename, short repeat)
 		(void) filename;
 		(void) repeat;
 		return(EXIT_SUCCESS);
-	#endif
-	
+	#else
 	unsigned long int new_channel;
 
 	BASS_ChannelStop(*audiochannel);
@@ -102,18 +103,18 @@ int audio_play(unsigned long int *audiochannel, char *filename, short repeat)
 		BASS_ChannelPlay(*audiochannel, FALSE);
 	}
 	return(EXIT_SUCCESS);
+	#endif
 
 }
 
 // Troca a música do mapa com uma transição suave e repete as dez faixas.
 int audio_play_map(int level)
 {
-	int track_index = (level - 1) % MAP_TRACK_COUNT;
-
 	#ifdef SOUND_OFF
-		(void) track_index;
+		(void) level;
 		return(EXIT_SUCCESS);
-	#endif
+	#else
+	int track_index = (level - 1) % MAP_TRACK_COUNT;
 
 	if (audio_mainchannel)
 	{
@@ -129,6 +130,7 @@ int audio_play_map(int level)
 	audio_fade_volume(audio_mainchannel, 0.0f, 1.0f);
 
 	return(EXIT_SUCCESS);
+	#endif
 }
 
 // Desabilita reprodução de áudio
@@ -136,9 +138,9 @@ void audio_stop(void)
 {
 	#ifdef SOUND_OFF
 		return;
-	#endif
-
+	#else
 	BASS_Stop();
+	#endif
 }
 
 // Indica se o canal ainda está tocando (útil para esperar um áudio terminar)
@@ -147,9 +149,9 @@ int audio_is_playing(unsigned long int audiochannel)
 	#ifdef SOUND_OFF
 		(void) audiochannel;
 		return(FALSE);
-	#endif
-
+	#else
 	return(BASS_ChannelIsActive(audiochannel) == BASS_ACTIVE_PLAYING);
+	#endif
 }
 
 // Indica se o arquivo dado é o que está tocando agora no canal principal
@@ -158,20 +160,19 @@ int audio_is_track_playing(const char *filename)
 	#ifdef SOUND_OFF
 		(void) filename;
 		return(FALSE);
-	#endif
-
+	#else
 	return(audio_is_playing(audio_mainchannel) && strcmp(last_track, filename) == 0);
+	#endif
 }
 
 unsigned int audio_get_duration_ms(unsigned long int audiochannel)
 {
-	QWORD length;
-	double seconds;
-
 	#ifdef SOUND_OFF
 		(void) audiochannel;
 		return(0);
-	#endif
+	#else
+	QWORD length;
+	double seconds;
 
 	length = BASS_ChannelGetLength(audiochannel, BASS_POS_BYTE);
 	seconds = BASS_ChannelBytes2Seconds(audiochannel, length);
@@ -181,6 +182,7 @@ unsigned int audio_get_duration_ms(unsigned long int audiochannel)
 	}
 
 	return((unsigned int) (seconds * 1000.0));
+	#endif
 }
 
 // Habilita reprodução de áudio
@@ -188,9 +190,9 @@ void audio_resume(void)
 {
 	#ifdef SOUND_OFF
 		return;
-	#endif
-
+	#else
 	BASS_Start();
+	#endif
 }
 
 // Inicializa o módulo de áudio com as configurações padrão
@@ -198,8 +200,7 @@ int audio_initialize(void)
 {
 	#ifdef SOUND_OFF
 		return(BASS_OK);
-	#endif
-
+	#else
 	if (audio_initialized)
 	{
 		return(BASS_OK);
@@ -218,6 +219,7 @@ int audio_initialize(void)
 
 	audio_initialized = 1;
 	return(BASS_OK);
+	#endif
 }
 
 // Finaliza o módulo de áudio corretamente
@@ -225,10 +227,10 @@ void audio_terminate(void)
 {
 	#ifdef SOUND_OFF
 		return;
-	#endif
-
+	#else
 	BASS_Free();
 	audio_initialized = 0;
 	audio_mainchannel = 0;
 	last_track[0] = '\0';
+	#endif
 }

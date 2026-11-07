@@ -31,6 +31,17 @@ make
 main.exe
 ```
 
+Para compilar e executar sem a biblioteca de áudio BASS:
+
+```bash
+mingw32-make clean
+mingw32-make SOUND_OFF=1
+main.exe
+```
+
+Nesse modo, o programa continua funcionando sem reproduzir sons. O modo padrão
+continua incluindo o suporte a áudio.
+
 O programa é navegável pelo teclado:
 
 - setas: navegar no menu

@@ -18,14 +18,21 @@ BASS_DIR = lib
 BASS_DLL = $(BASS_DIR)/bass.dll
 BASS_DEF = $(BASS_DIR)/bass.def
 BASS_LIB = $(BASS_DIR)/libbass.a
-LDFLAGS  = -L$(BASS_DIR) -lbass
+
+ifeq ($(SOUND_OFF),1)
+CFLAGS += -DSOUND_OFF
+AUDIO_DEPENDENCIES =
+AUDIO_LDFLAGS =
+else
+AUDIO_DEPENDENCIES = bass.dll
+AUDIO_LDFLAGS = -L$(BASS_DIR) -lbass
+$(OBJECTS): $(BASS_LIB)
+endif
 
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS) bass.dll
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
-
-$(OBJECTS): $(BASS_LIB)
+$(TARGET): $(OBJECTS) $(AUDIO_DEPENDENCIES)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET) $(AUDIO_LDFLAGS)
 
 $(BASS_LIB): $(BASS_DEF) $(BASS_DLL)
 	dlltool -d $(BASS_DEF) -D bass.dll -l $(BASS_LIB)
