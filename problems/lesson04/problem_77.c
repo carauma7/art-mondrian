@@ -9,6 +9,11 @@
 
 /*
 * PROBLEMA 7.7 - 
+EXERCICIO 06 - PROBLEMA 7 - Escreva uma sub-rotina
+para inverter os apontadores de uma lista. O elemento 
+que antes representava o início da lista passará 
+a ser o último elemento e o que atualmente é o
+último passará a ser o primeiro.
 */
 unsigned char ascii_problema_77[] = {
   0x45, 0x58, 0x45, 0x52, 0x43, 0x49, 0x43, 0x49, 0x4f, 0x20, 0x30, 0x36,

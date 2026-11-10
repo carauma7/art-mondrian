@@ -9,6 +9,11 @@
 
 /*
 * PROBLEMA 7.2 - 
+EXERCICIO 06 - PROBLEMA 2 - Escreva um programa 
+para concatenar duas listas - A e B gerando uma 
+terceira lista onde devem estar em primeiro lugar, 
+os elementos da lista A e em seguida os elementos
+da lista B.
 */
 unsigned char ascii_problema_72[] = {
   0x45, 0x58, 0x45, 0x52, 0x43, 0x49, 0x43, 0x49, 0x4f, 0x20, 0x30, 0x36,

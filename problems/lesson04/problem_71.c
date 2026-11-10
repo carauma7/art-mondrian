@@ -10,6 +10,10 @@
 
 /*
 * PROBLEMA 7.1 - 
+EXERCICIO 06 - PROBLEMA 1 - Codifique duas novas operações 
+para o TAD Lista, a primeira para verificar se a lista
+está ou não vazia e a segunda para procurar na lista 
+o seu maior valor.
 */
 unsigned char ascii_problema_71[] = {
   0x45, 0x58, 0x45, 0x52, 0x43, 0x49, 0x43, 0x49, 0x4f, 0x20, 0x30, 0x36,

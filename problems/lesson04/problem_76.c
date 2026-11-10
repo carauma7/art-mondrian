@@ -9,6 +9,12 @@
 
 /*
 * PROBLEMA 7.6 - 
+EXERCICIO 06 - PROBLEMA 6 - Especifique um novo TAD 
+para representar uma lista de pontos que representam 
+um caminho no plano cartesiano a ser percorrido. Além 
+das funções para inclusão, pesquisa e remoção implemente 
+também uma operação que calcule o tamanho do caminho 
+percorrido se todos os pontos da lista forem visitados.
 */
 unsigned char ascii_problema_76[] = {
   0x45, 0x58, 0x45, 0x52, 0x43, 0x49, 0x43, 0x49, 0x4f, 0x20, 0x30, 0x36,

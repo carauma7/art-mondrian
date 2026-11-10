@@ -9,6 +9,11 @@
 
 /*
 * PROBLEMA 7.4 - 
+EXERCICIO 06 - PROBLEMA 4 - Escreva uma subrotina
+que a partir de duas listas de caracteres informadas 
+como parâmetro verifique se todos os elementos da 
+lista A estão contidos também na lista B
+(independentemente da ordem).
 */
 unsigned char ascii_problema_74[] = {
   0x45, 0x58, 0x45, 0x52, 0x43, 0x49, 0x43, 0x49, 0x4f, 0x20, 0x30, 0x36,

@@ -9,6 +9,10 @@
 
 /*
 * PROBLEMA 7.5 - 
+EXERCICIO 06 - PROBLEMA 5 - Dadas duas listas 
+A e B, ambas com n elementos, escreva uma subrotina 
+que informe qual é o primeiro elemento da lista A 
+que não está presente na lista B.
 */
 unsigned char ascii_problema_75[] = {
   0x45, 0x58, 0x45, 0x52, 0x43, 0x49, 0x43, 0x49, 0x4f, 0x20, 0x30, 0x36,

@@ -9,6 +9,12 @@
 
 /*
 * PROBLEMA 7.3 - 
+EXERCICIO 06 - PROBLEMA 3 - Escreva um subrotina
+para comparar duas listas de caracteres. A subrotina 
+deve retornar 1 (verdadeiro)  se os elementos 
+das duas listas são os mesmos (e na mesma ordem)
+ou então 0 (falso) caso não 
+sejam iguais.
 */
 unsigned char ascii_problema_73[] = {
   0x45, 0x58, 0x45, 0x52, 0x43, 0x49, 0x43, 0x49, 0x4f, 0x20, 0x30, 0x36,
