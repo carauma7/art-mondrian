@@ -180,10 +180,10 @@ static void draw_paint_entering(void)
         SCREEN_HEIGHT * (SCREEN_WIDTH * 32 + 32) + 32);
 
     /*
-     * A pintura é maior que a tela. Ela começa acima da janela, com a
-     * última linha aparecendo primeiro, e desce até sair pelo rodapé.
+     * A pintura é maior que a tela. Ela começa abaixo da janela e sobe,
+     * com a primeira linha aparecendo primeiro.
      */
-    for (offset = -(int) line_count; offset <= SCREEN_HEIGHT; offset++)
+    for (offset = SCREEN_HEIGHT; offset >= -(int) line_count; offset--)
     {
         fb_append(&frame_buffer, "\033[0m\033[H");
         for (line = 0; line < SCREEN_HEIGHT; line++)

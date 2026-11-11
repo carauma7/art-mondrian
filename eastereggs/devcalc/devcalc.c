@@ -16,7 +16,7 @@
     (DEVCALC_BOX_RIGHT - DEVCALC_X - DEVCALC_INPUT_LABEL_WIDTH + 1)
 
 static const char devcalc_title[] =
-    "CALCULADORA DE DERIVADAS - v0.1 - DEUS É BOM O TEMPO TODO!";
+    "CALCULADORA DE DERIVADAS - v0.1 - D-US É BOM O TEMPO TODO!";
 
 static int devcalc_mondrian_background(int screen_x, int screen_y)
 {

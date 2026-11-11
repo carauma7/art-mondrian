@@ -10,7 +10,13 @@ SOURCES = graphics.c utils.c sound.c eastereggs/cobra/cobra.c \
 	problems/lesson03/problem_6.c problems/lesson04/problem_7.c \
 	problems/lesson04/problem_71.c problems/lesson04/problem_72.c problems/lesson04/problem_73.c \
 	problems/lesson04/problem_74.c problems/lesson04/problem_75.c problems/lesson04/problem_76.c \
-	problems/lesson04/problem_77.c problems/lesson08/problem_80.c main.c
+	problems/lesson04/problem_77.c problems/lesson08/problem_80.c \
+	problems/lesson11/problem_110.c problems/lesson11/sequential-search.c \
+	problems/lesson11/binary-search.c problems/lesson11/bubble-sort.c \
+	problems/lesson11/selection-sort.c problems/lesson11/insertion-sort.c \
+	problems/lesson11/merge-sort.c problems/lesson11/quick-sort.c \
+	problems/lesson11/radix-sort.c \
+	problems/lesson11/heap-sort.c main.c
 OBJECTS = $(SOURCES:.c=.o)
 TARGET = main.exe
 

@@ -18,6 +18,16 @@
 #include "problems/lesson04/problem_76.h"
 #include "problems/lesson04/problem_77.h"
 #include "problems/lesson08/problem_80.h"
+#include "problems/lesson11/problem_110.h"
+#include "problems/lesson11/sequential-search.h"
+#include "problems/lesson11/binary-search.h"
+#include "problems/lesson11/bubble-sort.h"
+#include "problems/lesson11/selection-sort.h"
+#include "problems/lesson11/insertion-sort.h"
+#include "problems/lesson11/merge-sort.h"
+#include "problems/lesson11/quick-sort.h"
+#include "problems/lesson11/radix-sort.h"
+#include "problems/lesson11/heap-sort.h"
 #include "eastereggs/devcalc/devcalc.h"
 #include "eastereggs/cobra/cobra.h"
 
@@ -58,20 +68,35 @@ void initialize_menu_items(void)
     menu_add_item("         ", "· Exercícios · Questão 06 · Coordenadas ·", "",          problem_76);
     menu_add_item("         ", "· Exercícios · Questão 07 · Inverter ·",    "",          problem_77);
     menu_add_item(" Aula 08 ", "· Heap ····························",       " 10/10/26", problem_80);
-    menu_add_item("         ", "···································",                 "",          NULL);
+    menu_add_item(" Aula 11 ", "· Ordenação e Busca (Trabalho) · Gerar Arquivos ·", " 11/11/2026", problem_110_generate_files);
+    menu_add_item("         ", "· Busca Sequencial ·················", "", sequential_search);
+    menu_add_item("         ", "· Busca Binária ····················", "", binary_search);
+    menu_add_item("         ", "· Bubble Sort ······················", "", bubble_sort);
+    menu_add_item("         ", "· Selection Sort ···················", "", selection_sort);
+    menu_add_item("         ", "· Ordenação por Inserção ············", "", insertion_sort);
+    menu_add_item("         ", "· Merge Sort ························", "", merge_sort);
+    menu_add_item("         ", "· Quick Sort ························", "", quick_sort);
+    menu_add_item("         ", "· Radix Sort ························", "", radix_sort);
+    menu_add_item("         ", "· Heap Sort ·························", "", heap_sort);
+    menu_add_item("         ", "· Comparativo ······················", "", problem_110_compare);
+    menu_add_item("         ", "···································",       "",          NULL);
     menu_add_item("         ", "· Surpresa: Calculadora de Derivadas", "", devcalcRun);
     menu_add_item("         ", "· Surpresa: Jogo da Cobrinha", "", run_cobra);
     menu_add_item("         ", "· Sair", "", NULL);
 }
-
 int run_selected_problem(int selected)
 {
+    if (selected < 1 || selected > menu_item_count)
+    {
+        return 0;
+    }
+
     if (selected == menu_item_count)
     {
         return 1;
     }
 
-    if (selected >= 1 && selected <= menu_item_count && menu_items[selected - 1].action != NULL)
+    if (menu_items[selected - 1].action != NULL)
     {
         menu_items[selected - 1].action();
         return 0;
