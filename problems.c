@@ -17,6 +17,7 @@
 #include "problems/lesson04/problem_75.h"
 #include "problems/lesson04/problem_76.h"
 #include "problems/lesson04/problem_77.h"
+#include "problems/lesson08/problem_80.h"
 #include "eastereggs/devcalc/devcalc.h"
 #include "eastereggs/cobra/cobra.h"
 
@@ -56,7 +57,8 @@ void initialize_menu_items(void)
     menu_add_item("         ", "· Exercícios · Questão 05 · Valor Ausente ·",     "",    problem_75);
     menu_add_item("         ", "· Exercícios · Questão 06 · Coordenadas ·", "",          problem_76);
     menu_add_item("         ", "· Exercícios · Questão 07 · Inverter ·",    "",          problem_77);
-    menu_add_item("         ", "··································",                 "",          NULL);
+    menu_add_item(" Aula 08 ", "· Heap ····························",       " 10/10/26", problem_80);
+    menu_add_item("         ", "···································",                 "",          NULL);
     menu_add_item("         ", "· Surpresa: Calculadora de Derivadas", "", devcalcRun);
     menu_add_item("         ", "· Surpresa: Jogo da Cobrinha", "", run_cobra);
     menu_add_item("         ", "· Sair", "", NULL);

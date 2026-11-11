@@ -10,7 +10,7 @@ SOURCES = graphics.c utils.c sound.c eastereggs/cobra/cobra.c \
 	problems/lesson03/problem_6.c problems/lesson04/problem_7.c \
 	problems/lesson04/problem_71.c problems/lesson04/problem_72.c problems/lesson04/problem_73.c \
 	problems/lesson04/problem_74.c problems/lesson04/problem_75.c problems/lesson04/problem_76.c \
-	problems/lesson04/problem_77.c main.c
+	problems/lesson04/problem_77.c problems/lesson08/problem_80.c main.c
 OBJECTS = $(SOURCES:.c=.o)
 TARGET = main.exe
 
