@@ -150,6 +150,8 @@ Aluno *alunos_atualizar ( Aluno **inicio, char *nome, float nota1, float nota2, 
 
 int alunos_totalDeAlunos ( Aluno **inicio ) 
 {
+    if (inicio == NULL) return 0;
+
     Aluno *atual = *inicio;
     int total = 0;
     while ( atual != NULL ) 
@@ -158,6 +160,48 @@ int alunos_totalDeAlunos ( Aluno **inicio )
         atual = atual->proximo;
     }
     return total;
+}
+
+int alunos_contemTodos ( Aluno **listaA, Aluno **listaB )
+{
+    if (listaA == NULL || listaB == NULL) return 0;
+
+    for (Aluno *atual = *listaA; atual != NULL; atual = atual->proximo)
+    {
+        if (alunos_buscar(listaB, atual->nome) == NULL) return 0;
+    }
+
+    return 1;
+}
+
+Aluno *alunos_primeiroAusente ( Aluno **listaA, Aluno **listaB )
+{
+    if (listaA == NULL || listaB == NULL) return NULL;
+
+    for (Aluno *atual = *listaA; atual != NULL; atual = atual->proximo)
+    {
+        if (alunos_buscar(listaB, atual->nome) == NULL) return atual;
+    }
+
+    return NULL;
+}
+
+void alunos_inverter ( Aluno **inicio )
+{
+    if (inicio == NULL) return;
+
+    Aluno *anterior = NULL;
+    Aluno *atual = *inicio;
+
+    while (atual != NULL)
+    {
+        Aluno *proximo = atual->proximo;
+        atual->proximo = anterior;
+        anterior = atual;
+        atual = proximo;
+    }
+
+    *inicio = anterior;
 }
 
 Aluno *alunos_maiorMedia ( Aluno **inicio )

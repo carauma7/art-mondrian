@@ -39,9 +39,35 @@ void problem_75(void)
     draw_problem_screen( 5 , ( const char * ) ascii_problema_75 );
     //----------------------------------------------------
 
+    Aluno *listaA;
+    Aluno *listaB;
+    alunos_inicializar(&listaA);
+    alunos_inicializar(&listaB);
+
+    alunos_cadastrar(&listaA, "A. Toa", 7.12, 8.34, 9.01);
+    alunos_cadastrar(&listaA, "B. B. Cana", 6.78, 7.89, 8.12);
+    alunos_cadastrar(&listaA, "A. Tordoada", 9.00, 8.00, 7.00);
+
+    alunos_cadastrar(&listaB, "A. Bilolada", 7.21, 5.49, 9.12);
+    alunos_cadastrar(&listaB, "B. B. Cana", 6.78, 7.89, 8.12);
+    alunos_cadastrar(&listaB, "A. Toa", 7.12, 8.34, 9.01);
+
+    textcolor(CYAN);textbackground(BLACK);
+    gotoxy(9, 10); printf("Lista A:");
+    alunos_imprimir(&listaA, 9, 11);
+    gotoxy(9, 15); printf("Lista B:");
+    alunos_imprimir(&listaB, 9, 16);
+
+    Aluno *ausente = alunos_primeiroAusente(&listaA, &listaB);
     textcolor(GREEN);textbackground(BLACK);
-    gotoxy(9, 11); printf("Digite o número de crianças (n)");
-    gotoxy(9, 12); printf("ou 'sair' para encerrar.");
+    gotoxy(9, 20);
+    if (ausente != NULL)
+        printf("Primeiro elemento de A ausente em B: %s", ausente->nome);
+    else
+        printf("Todos os elementos de A estao em B.");
+
+    alunos_apagarTudo(&listaA);
+    alunos_apagarTudo(&listaB);
 
     //---------------------------------------------------
     waitEsc();

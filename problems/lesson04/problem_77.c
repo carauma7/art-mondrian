@@ -45,9 +45,26 @@ void problem_77(void)
     draw_problem_screen( 5 , ( const char * ) ascii_problema_77 );
     //----------------------------------------------------
 
+    Aluno *alunos;
+    alunos_inicializar(&alunos);
+
+    alunos_cadastrar(&alunos, "A. Tordoada", 7.12, 8.34, 9.01);
+    alunos_cadastrar(&alunos, "B. B. Cana", 6.78, 7.89, 8.12);
+
+    textcolor(CYAN);textbackground(BLACK);
+    gotoxy(9, 11); printf("Lista antes de inverter:");
+    alunos_imprimir(&alunos, 9, 12);
+
+    alunos_inverter(&alunos);
+
     textcolor(GREEN);textbackground(BLACK);
-    gotoxy(9, 12); printf("Digite o número de crianças (n)");
-    gotoxy(9, 13); printf("ou 'sair' para encerrar.");
+    gotoxy(9, 15); printf("Lista depois de inverter:");
+    alunos_imprimir(&alunos, 9, 16);
+    gotoxy(9, 20); printf("A nova cabeça é: %s", alunos->nome);
+
+    alunos_apagarTudo(&alunos);
+
+    textcolor(GREEN);textbackground(BLACK);
 
     //---------------------------------------------------
     waitEsc();

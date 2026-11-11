@@ -6,6 +6,7 @@
 #include "../../utils.h"
 
 #include "problem_7.h"
+#include "problem_76.h"
 
 /*
 * PROBLEMA 7.6 - 
@@ -49,14 +50,160 @@ unsigned char ascii_problema_76[] = {
 };
 unsigned int ascii_problema_76_length = 338;
 
+void pontos_inicializar(Ponto **inicio)
+{
+    if (inicio != NULL) *inicio = NULL;
+}
+
+void pontos_apagarTudo(Ponto **inicio)
+{
+    if (inicio == NULL) return;
+
+    Ponto *atual = *inicio;
+    while (atual != NULL)
+    {
+        Ponto *proximo = atual->proximo;
+        free(atual);
+        atual = proximo;
+    }
+    *inicio = NULL;
+}
+
+int pontos_inserir(Ponto **inicio, float x, float y)
+{
+    if (inicio == NULL) return 0;
+
+    Ponto *novo = malloc(sizeof(*novo));
+    if (novo == NULL) return 0;
+
+    novo->x = x;
+    novo->y = y;
+    novo->proximo = NULL;
+
+    if (*inicio == NULL)
+    {
+        *inicio = novo;
+        return 1;
+    }
+
+    Ponto *atual = *inicio;
+    while (atual->proximo != NULL) atual = atual->proximo;
+    atual->proximo = novo;
+    return 1;
+}
+
+Ponto *pontos_buscar(Ponto **inicio, float x, float y)
+{
+    if (inicio == NULL) return NULL;
+
+    for (Ponto *atual = *inicio; atual != NULL; atual = atual->proximo)
+    {
+        if (atual->x == x && atual->y == y) return atual;
+    }
+    return NULL;
+}
+
+int pontos_remover(Ponto **inicio, float x, float y)
+{
+    if (inicio == NULL) return 0;
+
+    Ponto *atual = *inicio;
+    Ponto *anterior = NULL;
+    while (atual != NULL && (atual->x != x || atual->y != y))
+    {
+        anterior = atual;
+        atual = atual->proximo;
+    }
+
+    if (atual == NULL) return 0;
+
+    if (anterior == NULL) *inicio = atual->proximo;
+    else anterior->proximo = atual->proximo;
+    free(atual);
+    return 1;
+}
+
+static double raizQuadradaBabylonica(double valor)
+{
+    if (valor <= 0.0) return 0.0;
+
+    double estimativa = valor < 1.0 ? 1.0 : valor;
+    for (int iteracao = 0; iteracao < 256; iteracao++)
+    {
+        double proxima = 0.5 * (estimativa + valor / estimativa);
+        double diferenca = proxima > estimativa
+            ? proxima - estimativa
+            : estimativa - proxima;
+
+        if (proxima == estimativa || diferenca <= estimativa * 1e-12)
+            return proxima;
+
+        estimativa = proxima;
+    }
+
+    return estimativa;
+}
+
+float pontos_tamanhoCaminho(Ponto **inicio)
+{
+    if (inicio == NULL || *inicio == NULL) return 0.0f;
+
+    double tamanho = 0.0;
+    for (Ponto *atual = *inicio; atual->proximo != NULL; atual = atual->proximo)
+    {
+        double deltaX = (double)atual->proximo->x - atual->x;
+        double deltaY = (double)atual->proximo->y - atual->y;
+        tamanho += raizQuadradaBabylonica(deltaX * deltaX + deltaY * deltaY);
+    }
+    return (float)tamanho;
+}
+
 void problem_76(void)
 {
     draw_problem_screen( 5 , ( const char * ) ascii_problema_76 );
     //----------------------------------------------------
 
+    Ponto *caminho;
+    pontos_inicializar(&caminho);
+    if (!pontos_inserir(&caminho, 0.0f, 0.0f)
+        || !pontos_inserir(&caminho, 3.0f, 4.0f)
+        || !pontos_inserir(&caminho, 6.0f, 4.0f)
+        || !pontos_inserir(&caminho, 6.0f, 8.0f))
+    {
+        pontos_apagarTudo(&caminho);
+        textcolor(RED);textbackground(BLACK);
+        gotoxy(9, 11); printf("Não foi possivel alocar os pontos do caminho.");
+        waitEsc();
+        return;
+    }
+
+    textcolor(CYAN);textbackground(BLACK);
+    gotoxy(9, 13); printf("Caminho: (0,0) -> (3,4) -> (6,4) -> (6,8)");
+    textcolor(WHITE);
+    gotoxy(9, 14); printf("Tamanho do caminho: %.2f unidades.",
+        pontos_tamanhoCaminho(&caminho));
+
+    Ponto *encontrado = pontos_buscar(&caminho, 3.0f, 4.0f);
+    textcolor(GREEN);
+    gotoxy(9, 16); printf("Busca por (3,4): %s",
+        encontrado != NULL ? "ponto encontrado" : "ponto nao encontrado");
+
+    if (pontos_remover(&caminho, 3.0f, 4.0f))
+    {
+        textcolor(YELLOW);
+        gotoxy(9, 17); printf("Após remover (3,4), tamanho do caminho: %.2f unidades",
+            pontos_tamanhoCaminho(&caminho));
+    }
+    else
+    {
+        textcolor(RED);
+        gotoxy(9, 17); printf("Nao foi possivel remover o ponto (3,4).");
+    }
+
+    pontos_apagarTudo(&caminho);
+
     textcolor(GREEN);textbackground(BLACK);
-    gotoxy(9, 13); printf("Digite o número de crianças (n)");
-    gotoxy(9, 14); printf("ou 'sair' para encerrar.");
+    gotoxy(9, 19); printf("Lista de pontos liberada :)");
 
     //---------------------------------------------------
     waitEsc();

@@ -43,9 +43,30 @@ void problem_74(void)
     draw_problem_screen( 5 , ( const char * ) ascii_problema_74 );
     //----------------------------------------------------
 
+    Aluno *listaA;
+    Aluno *listaB;
+    alunos_inicializar(&listaA);
+    alunos_inicializar(&listaB);
+
+    alunos_cadastrar(&listaA, "A. Toa", 7.12, 8.34, 9.01);
+    alunos_cadastrar(&listaA, "B. B. Cana", 6.78, 7.89, 8.12);    
+
+    alunos_cadastrar(&listaB, "C. Tordoada", 8.76, 7.65, 9.78);
+    alunos_cadastrar(&listaB, "A. Toa", 7.12, 8.34, 9.01);
+    alunos_cadastrar(&listaB, "B. B. Cana", 6.78, 7.89, 8.12);
+
+    textcolor(CYAN);textbackground(BLACK);
+    gotoxy(9, 11); printf("Lista A:");
+    alunos_imprimir(&listaA, 9, 12);
+    gotoxy(9, 14); printf("Lista B:");
+    alunos_imprimir(&listaB, 9, 15);
+
     textcolor(GREEN);textbackground(BLACK);
-    gotoxy(9, 12); printf("Digite o número de crianças (n)");
-    gotoxy(9, 13); printf("ou 'sair' para encerrar.");
+    gotoxy(9, 19); printf("Todos os elementos de A estao em B? %s",
+        alunos_contemTodos(&listaA, &listaB) ? "Sim" : "Nao");
+
+    alunos_apagarTudo(&listaA);
+    alunos_apagarTudo(&listaB);
 
     //---------------------------------------------------
     waitEsc();
