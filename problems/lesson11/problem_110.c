@@ -1012,7 +1012,7 @@ void lesson11_run_algorithm(
     else if (info->operation_label != NULL)
     {
         add_line(lines, &line_count, "Operações realizadas:", WHITE);
-        snprintf(text, sizeof(text), " n       %-13s movimentações",
+        snprintf(text, sizeof(text), " n       %-13s trocas",
                  info->operation_label);
         add_line(lines, &line_count, text, YELLOW);
         for (i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++)
@@ -1027,7 +1027,7 @@ void lesson11_run_algorithm(
     else
     {
         add_line(lines, &line_count,
-                 "Contagem de comparações/movimentações omitida para Radix Sort.",
+                 "Contagem de comparações/trocas omitida para Radix Sort.",
                  LIGHTBLUE);
     }
     refresh_lines(lines, line_count, 0);
