@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
 
 #include "../../graphics.h"
 #include "../../utils.h"
@@ -17,8 +18,9 @@
 #include "heap-sort.h"
 
 #define LESSON_11_DATA_DIR "problems/lesson11/data"
-#define LESSON_11_MAX_LINES 128
+#define LESSON_11_MAX_LINES 512
 #define LESSON_11_LINE_WIDTH 61
+#define LESSON_11_MAX_INPUT_SIZES 32
 
 typedef struct
 {
@@ -292,6 +294,41 @@ static int write_sorted_output(
 }
 
 static void data_path(char *path, size_t size, size_t count);
+
+static int compare_input_sizes(const void *left, const void *right)
+{
+    size_t a = *(const size_t *)left;
+    size_t b = *(const size_t *)right;
+    return (a > b) - (a < b);
+}
+
+static size_t discover_input_sizes(size_t *sizes, size_t capacity)
+{
+    WIN32_FIND_DATAA entry;
+    HANDLE search;
+    char pattern[128];
+    size_t count = 0;
+
+    snprintf(pattern, sizeof(pattern), "%s/inteiros_*.txt", LESSON_11_DATA_DIR);
+    search = FindFirstFileA(pattern, &entry);
+    if (search == INVALID_HANDLE_VALUE) return 0;
+
+    do
+    {
+        unsigned long candidate;
+        char extra;
+
+        if (sscanf(entry.cFileName, "inteiros_%lu.txt%c", &candidate, &extra) == 1 &&
+            candidate > 0 && count < capacity)
+        {
+            sizes[count++] = (size_t)candidate;
+        }
+    } while (FindNextFileA(search, &entry));
+    FindClose(search);
+
+    qsort(sizes, count, sizeof(*sizes), compare_input_sizes);
+    return count;
+}
 
 static const char *generation_options[] = {
     "Gerar 100 números aleatórios",
@@ -620,20 +657,31 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
 
         void problem_110_compare(void)
         {
-            static const size_t sizes[] = { 100, 1000, 10000, 100000 };
+            size_t sizes[LESSON_11_MAX_INPUT_SIZES];
+            size_t size_count;
             static const Lesson11AlgorithmDefinition *algorithms[] = {
                 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
             };
             Lesson11Line lines[LESSON_11_MAX_LINES];
-            double times[9][4] = { { 0.0 } };
-            unsigned long long theoretical[9][4] = { { 0 } };
-            int projected[9][4] = { { 0 } };
-            int available[4] = { 0, 0, 0, 0 };
+            double times[9][LESSON_11_MAX_INPUT_SIZES] = { { 0.0 } };
+            unsigned long long theoretical[9][LESSON_11_MAX_INPUT_SIZES] = { { 0 } };
+            int available[LESSON_11_MAX_INPUT_SIZES] = { 0 };
             int line_count = 0;
             size_t algorithm_index;
             size_t size_index;
             char text[LESSON_11_LINE_WIDTH + 1];
 
+            size_count = discover_input_sizes(sizes, LESSON_11_MAX_INPUT_SIZES);
+            if (size_count == 0)
+            {
+                draw_problem_screen(11, "    AULA 11 - COMPARATIVO");
+                add_line(lines, &line_count,
+                         "Nenhum arquivo inteiros_*.txt foi encontrado em data.",
+                         LIGHTRED);
+                refresh_lines(lines, line_count, 0);
+                waitEsc();
+                return;
+            }
             algorithms[0] = sequential_search_definition();
             algorithms[1] = binary_search_definition();
             algorithms[2] = bubble_sort_definition();
@@ -647,13 +695,13 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
             draw_problem_screen(11, "    AULA 11 - COMPARATIVO");
             comparison_progress_active = 1;
             comparison_progress_completed = 0;
-            comparison_progress_total = 4 * 9;
+            comparison_progress_total = size_count * 9;
             comparison_progress_fraction = 0.0;
             comparison_progress_last_sample_fraction = 0.0;
             comparison_progress_last_sample_ms = 0.0;
             comparison_progress_smoothed_rate = 0.0;
             QueryPerformanceCounter(&comparison_progress_start);
-            for (size_index = 0; size_index < 4; size_index++)
+            for (size_index = 0; size_index < size_count; size_index++)
             {
                 int *original;
 
@@ -687,24 +735,6 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
                     snprintf(text, sizeof(text), "%s · %lu", algorithms[algorithm_index]->info.name,
                              (unsigned long)sizes[size_index]);
                     lesson11_algorithm_progress(text, 0, 1);
-                    if (size_index == 3 && algorithm_index >= 2 && algorithm_index <= 4)
-                    {
-                        theoretical[algorithm_index][size_index] =
-                            theoretical_comparisons(&algorithms[algorithm_index]->info, sizes[size_index]);
-                        if (times[algorithm_index][2] > 0.0 &&
-                            theoretical[algorithm_index][2] > 0)
-                        {
-                            times[algorithm_index][size_index] =
-                                times[algorithm_index][2] *
-                                (double)theoretical[algorithm_index][size_index] /
-                                (double)theoretical[algorithm_index][2];
-                        }
-                        projected[algorithm_index][size_index] = 1;
-                        comparison_progress_completed++;
-                        lesson11_algorithm_progress("Projeção quadrática concluída.", 1, 1);
-                        free(values);
-                        continue;
-                    }
                     if (algorithms[algorithm_index]->preparation != NULL)
                     {
                         algorithms[algorithm_index]->preparation(
@@ -745,7 +775,7 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
             {
                 add_line(lines, &line_count, algorithms[algorithm_index]->info.name,
                          algorithm_index % 3 == 0 ? RED : algorithm_index % 3 == 1 ? BLUE : YELLOW);
-                for (size_index = 0; size_index < 4; size_index++)
+                for (size_index = 0; size_index < size_count; size_index++)
                 {
                     double estimated = 0.0;
                     double practical_growth = 0.0;
@@ -756,7 +786,6 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
                     char practical_factor[24];
                     char theoretical_factor[24];
                     char ratio_factor[24];
-                    char marker[2] = "";
 
                     if (!available[size_index]) continue;
                     if (times[algorithm_index][0] > 0.0)
@@ -776,9 +805,8 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
                     format_factor(practical_factor, sizeof(practical_factor), practical_growth);
                     format_factor(theoretical_factor, sizeof(theoretical_factor), theoretical_growth);
                     format_factor(ratio_factor, sizeof(ratio_factor), ratio);
-                    if (projected[algorithm_index][size_index]) marker[0] = '~';
-                    snprintf(text, sizeof(text), " %s%4lu %10.12s %10.12s %7.7s %7.7s %9.9s",
-                             marker, (unsigned long)sizes[size_index], practical, estimate,
+                    snprintf(text, sizeof(text), " %4lu %10.12s %10.12s %7.7s %7.7s %9.9s",
+                             (unsigned long)sizes[size_index], practical, estimate,
                              practical_factor, theoretical_factor, ratio_factor);
                     add_line(lines, &line_count, text,
                              size_index % 2 == 0 ? LIGHTGREEN : WHITE);
@@ -792,7 +820,7 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
             {
                 add_line(lines, &line_count, algorithms[algorithm_index]->info.name,
                          algorithm_index % 3 == 0 ? RED : algorithm_index % 3 == 1 ? BLUE : YELLOW);
-                for (size_index = 0; size_index < 4; size_index++)
+                for (size_index = 0; size_index < size_count; size_index++)
                 {
                     double estimated = 0.0;
                     double practical_growth = 0.0;
@@ -803,7 +831,6 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
                     char practical_factor[24];
                     char theoretical_factor[24];
                     char ratio_factor[24];
-                    char marker[2] = "";
 
                     if (!available[size_index]) continue;
                     if (times[algorithm_index][0] > 0.0)
@@ -823,9 +850,8 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
                     format_factor(practical_factor, sizeof(practical_factor), practical_growth);
                     format_factor(theoretical_factor, sizeof(theoretical_factor), theoretical_growth);
                     format_factor(ratio_factor, sizeof(ratio_factor), ratio);
-                    if (projected[algorithm_index][size_index]) marker[0] = '~';
-                    snprintf(text, sizeof(text), " %s%4lu %10.12s %10.12s %7.7s %7.7s %9.9s",
-                             marker, (unsigned long)sizes[size_index], practical, estimate,
+                    snprintf(text, sizeof(text), " %4lu %10.12s %10.12s %7.7s %7.7s %9.9s",
+                             (unsigned long)sizes[size_index], practical, estimate,
                              practical_factor, theoretical_factor, ratio_factor);
                     add_line(lines, &line_count, text,
                              size_index % 2 == 0 ? LIGHTGREEN : WHITE);
@@ -835,14 +861,13 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
             add_line(lines, &line_count, "x prático: crescimento medido desde n = 100.", LIGHTBLUE);
             add_line(lines, &line_count, "x teórico: crescimento previsto pela fórmula do algoritmo.", LIGHTBLUE);
             add_line(lines, &line_count, "prát./teór.: aderência do crescimento observado ao previsto.", LIGHTBLUE);
-            add_line(lines, &line_count, "~ indica projeção teórica para custo quadrático em n = 100.000.", YELLOW);
             add_line(lines, &line_count, "", WHITE);
             add_line(lines, &line_count, "VELOCIDADE DAS ORDENAÇÕES (elementos por segundo)", BLUE);
             for (algorithm_index = 2; algorithm_index < 9; algorithm_index++)
             {
                 add_line(lines, &line_count, algorithms[algorithm_index]->info.name,
                          algorithm_index % 3 == 0 ? RED : algorithm_index % 3 == 1 ? BLUE : YELLOW);
-                for (size_index = 0; size_index < 4; size_index++)
+                for (size_index = 0; size_index < size_count; size_index++)
                 {
                     char speed[32];
 
@@ -856,7 +881,7 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
                         text,
                         sizeof(text),
                         "%s%lu: %s",
-                        projected[algorithm_index][size_index] ? "~" : "",
+                        "",
                         (unsigned long)sizes[size_index],
                         speed);
                     add_line(lines, &line_count, text,
@@ -870,20 +895,22 @@ void lesson11_run_algorithm(
     Lesson11Algorithm preparation,
     Lesson11Algorithm algorithm)
 {
-    static const size_t sizes[] = { 100, 1000, 10000 };
+    size_t sizes[LESSON_11_MAX_INPUT_SIZES];
+    size_t size_count;
     Lesson11Line lines[LESSON_11_MAX_LINES];
     char text[128];
     char duration[32];
     char theoretical_duration[32];
     char processing_rate[32];
-    double times[3] = { 0.0, 0.0, 0.0 };
-    unsigned long long practical_comparisons[3] = { 0, 0, 0 };
-    unsigned long long practical_movements[3] = { 0, 0, 0 };
-    unsigned long long theoretical_operations[3] = { 0, 0, 0 };
-    int available[3] = { 0, 0, 0 };
+    double times[LESSON_11_MAX_INPUT_SIZES] = { 0.0 };
+    unsigned long long practical_comparisons[LESSON_11_MAX_INPUT_SIZES] = { 0 };
+    unsigned long long practical_movements[LESSON_11_MAX_INPUT_SIZES] = { 0 };
+    unsigned long long theoretical_operations[LESSON_11_MAX_INPUT_SIZES] = { 0 };
+    int available[LESSON_11_MAX_INPUT_SIZES] = { 0 };
     int line_count = 0;
     size_t i;
 
+    size_count = discover_input_sizes(sizes, LESSON_11_MAX_INPUT_SIZES);
     draw_problem_screen(11, info->name);
     add_wrapped(lines, &line_count, "Algoritmo: ", info->name, LIGHTCYAN);
     add_wrapped(lines, &line_count, "Complexidade: ", info->complexity, YELLOW);
@@ -895,7 +922,16 @@ void lesson11_run_algorithm(
         add_line(lines, &line_count, text, LIGHTCYAN);
     }
     add_line(lines, &line_count, "Desempenho:", WHITE);
-    for (i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++)
+    if (size_count == 0)
+    {
+        add_line(lines, &line_count,
+                 "Nenhum arquivo inteiros_*.txt foi encontrado em data.",
+                 LIGHTRED);
+        refresh_lines(lines, line_count, 0);
+        waitEsc();
+        return;
+    }
+    for (i = 0; i < size_count; i++)
     {
         int *values;
         Lesson11Metrics metrics = { 0, 0, 0.0, 0 };
@@ -951,7 +987,7 @@ void lesson11_run_algorithm(
     }
 
     add_line(lines, &line_count, " n      t. prático   t. teórico   velocidade", YELLOW);
-    for (i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++)
+    for (i = 0; i < size_count; i++)
     {
         double estimated_time = 0.0;
 
@@ -1002,7 +1038,7 @@ void lesson11_run_algorithm(
             practical_comparisons[0]
         );
         add_line(lines, &line_count, text, WHITE);
-        for (i = 1; i < sizeof(sizes) / sizeof(sizes[0]); i++)
+        for (i = 1; i < size_count; i++)
         {
             snprintf(text, sizeof(text), "%5lu %16llu",
                      (unsigned long)sizes[i], practical_comparisons[i]);
@@ -1015,7 +1051,7 @@ void lesson11_run_algorithm(
         snprintf(text, sizeof(text), " n       %-13s trocas",
                  info->operation_label);
         add_line(lines, &line_count, text, YELLOW);
-        for (i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++)
+        for (i = 0; i < size_count; i++)
         {
             snprintf(text, sizeof(text), "%5lu %16llu %16llu",
                      (unsigned long)sizes[i],

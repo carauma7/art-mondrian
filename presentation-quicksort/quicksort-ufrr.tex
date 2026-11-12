@@ -520,67 +520,93 @@ static void quick_sort(int *a, size_t lo, size_t hi)
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-      width=.84\textwidth,height=5.1cm,
+      width=.91\textwidth,height=5.55cm,
       xmode=log,ymode=log,
       log basis x=10,log basis y=10,
-      xlabel={Tamanho \(n\) (escala logarítmica)},
-      ylabel={Operações normalizadas (escala logarítmica)},
-      xmin=100,xmax=100000,ymin=.7,ymax=2000000,
+      xlabel={Tamanho da entrada \(n\)},
+      ylabel={Custo relativo},
+      xmin=85,xmax=125000,ymin=.7,ymax=2000000,
       xtick={100,1000,10000,100000},
       xticklabels={100,1.000,10.000,100.000},
-      ymajorgrids=true,xmajorgrids=true,
-      grid style={draw=SoftGray},
-      legend style={at={(.02,.98)},anchor=north west,draw=none,fill=white,font=\scriptsize},
+      ytick={1,10,100,1000,10000,100000,1000000},
+      yticklabels={1,10,100,1.000,10.000,100.000,1.000.000},
+      grid=major,
+      major grid style={draw=SoftGray,line width=.45pt},
+      minor grid style={draw=SoftGray!55,line width=.2pt},
+      axis line style={MondrianBlack!75},
+      tick style={MondrianBlack!75},
+      legend style={at={(.5,1.04)},anchor=south,draw=none,fill=white,
+        font=\scriptsize,column sep=1em},
+      legend image post style={xscale=1.1},
       tick label style={font=\scriptsize},
-      label style={font=\scriptsize}
+      label style={font=\scriptsize},
+      clip=false
     ]
-      \addplot[very thick,MondrianBlue,mark=square*] coordinates {(100,1) (1000,15.05) (10000,200.1) (100000,250.1)};
-      \addlegendentry{\(n\log_2 n\), normalizado em \(n=100\)}
-      \addplot[very thick,MondrianRed,mark=*] coordinates {(100,1) (1000,100) (10000,10000) (100000,1000000)};
-      \addlegendentry{\(n^2\), normalizado em \(n=100\)}
+      \addplot[line width=1.35pt,MondrianBlue,mark=square*,mark size=2.2pt,
+        mark options={fill=white,line width=.7pt}] coordinates
+        {(100,1) (1000,15.05) (10000,200.1) (100000,250.1)};
+      \addlegendentry{\(n\log_2 n\)}
+      \addplot[line width=1.35pt,MondrianRed,mark=*,mark size=2.2pt,
+        mark options={fill=white,line width=.7pt}] coordinates
+        {(100,1) (1000,100) (10000,10000) (100000,1000000)};
+      \addlegendentry{\(n^2\)}
     \end{axis}
   \end{tikzpicture}
-  \vspace{-.1em}
-  \small Curvas assintóticas ilustrativas: Quick Sort balanceado segue a tendência \(n\log n\); partições extremas seguem \(n^2\). Não são tempos medidos.
+  \vspace{-.05em}
+  \scriptsize Curvas normalizadas em \(n=100\). A escala log--log evidencia a diferença entre crescimento linearítmico e quadrático; não são tempos medidos.
 \end{frame}
 
 \begin{frame}{Resultados práticos registrados: crescimento por tamanho}
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-      width=.88\textwidth,height=5.5cm,
-      ymode=log,log basis y=10,
-      xlabel={Número de elementos},
-      ylabel={Tempo codificado no nome do arquivo (ms; log)},
-      xmin=100,xmax=100000,ymin=.004,ymax=200,
+      width=.91\textwidth,height=5.65cm,
+      xmode=log,ymode=log,
+      log basis x=10,log basis y=10,
+      xlabel={Número de elementos \(n\)},
+      ylabel={Tempo registrado (ms)},
+      xmin=85,xmax=125000,ymin=.004,ymax=200,
       xtick={100,1000,10000,100000},
       xticklabels={100,1.000,10.000,100.000},
-      ymajorgrids=true,xmajorgrids=true,
-      grid style={draw=SoftGray},
+      ytick={.01,.1,1,10,100},
+      yticklabels={0,01;0,1;1;10;100},
+      grid=major,
+      major grid style={draw=SoftGray,line width=.45pt},
+      minor grid style={draw=SoftGray!55,line width=.2pt},
+      axis line style={MondrianBlack!75},
+      tick style={MondrianBlack!75},
       legend columns=4,
-      legend style={at={(.5,-.22)},anchor=north,draw=none,font=\tiny},
+      legend style={at={(.5,1.04)},anchor=south,draw=none,fill=white,font=\tiny,
+        column sep=.7em,row sep=.15em},
       tick label style={font=\scriptsize},
       label style={font=\scriptsize},
       clip=false
     ]
-      \addplot[mark=square*,MondrianRed,thick] coordinates {(100,.022) (1000,2) (10000,117)};
+      \addplot[mark=square*,mark size=1.8pt,MondrianRed,line width=1.05pt,
+        mark options={fill=white,line width=.6pt}] coordinates {(100,.022) (1000,1) (10000,117)};
       \addlegendentry{Bubble}
-      \addplot[mark=triangle*,MondrianBlue,thick] coordinates {(100,.006) (1000,.091) (10000,1) (100000,13)};
+      \addplot[mark=triangle*,mark size=2pt,MondrianBlue,line width=1.05pt,
+        mark options={fill=white,line width=.6pt}] coordinates {(100,.006) (1000,.091) (10000,1) (100000,13)};
       \addlegendentry{Heap}
-      \addplot[mark=*,MondrianBlack,thick] coordinates {(100,.008) (1000,.709) (10000,48)};
+      \addplot[mark=*,mark size=1.8pt,MondrianBlack,line width=1.05pt,
+        mark options={fill=white,line width=.6pt}] coordinates {(100,.008) (1000,.709) (10000,48)};
       \addlegendentry{Insertion}
-      \addplot[mark=diamond*,MondrianYellow,thick] coordinates {(100,.008) (1000,.090) (10000,.920) (100000,11)};
+      \addplot[mark=diamond*,mark size=2pt,MondrianYellow,line width=1.05pt,
+        mark options={fill=white,line width=.6pt}] coordinates {(100,.008) (1000,.090) (10000,.920) (100000,11)};
       \addlegendentry{Merge}
-      \addplot[mark=pentagon*,MondrianBlue,dashed,thick] coordinates {(100,.005) (1000,.064) (10000,.750) (100000,10)};
+      \addplot[mark=pentagon*,mark size=2pt,MondrianBlue,dashed,line width=1.15pt,
+        mark options={fill=white,line width=.6pt}] coordinates {(100,.005) (1000,.064) (10000,.750) (100000,10)};
       \addlegendentry{Quick}
-      \addplot[mark=oplus,MondrianRed,dashed,thick] coordinates {(100,.012) (1000,.110) (10000,1) (100000,9)};
+      \addplot[mark=oplus,mark size=2pt,MondrianRed,dashed,line width=1.15pt,
+        mark options={fill=white,line width=.6pt}] coordinates {(100,.012) (1000,.110) (10000,1) (100000,9)};
       \addlegendentry{Radix}
-      \addplot[mark=x,MondrianBlack,dashed,thick] coordinates {(100,.013) (1000,1) (10000,90)};
+      \addplot[mark=x,mark size=2pt,MondrianBlack,dashed,line width=1.05pt,
+        mark options={fill=white,line width=.6pt}] coordinates {(100,.013) (1000,1) (10000,90)};
       \addlegendentry{Selection}
     \end{axis}
   \end{tikzpicture}
-  \vspace{-.1em}
-  \tiny Tempos aproximados a partir dos sufixos dos arquivos \texttt{data/*-sort/*}. Os pontos de \(100.000\) estão disponíveis somente para Heap, Merge, Quick e Radix; o gráfico não interpola dados ausentes.
+  \vspace{-.05em}
+  \scriptsize Escala log--log para tornar comparáveis \(0,005\) ms e \(117\) ms. Pontos de \(100.000\) existem somente para Heap, Merge, Quick e Radix; as linhas ausentes não foram extrapoladas.
 \end{frame}
 
 \begin{frame}{Curvas teóricas versus medidas: escala relativa}
