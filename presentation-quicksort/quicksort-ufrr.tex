@@ -1,0 +1,795 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,array}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{listings}
+\usepackage{ragged2e}
+\usepackage{hyperref}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,calc,decorations.pathreplacing}
+\pgfplotsset{compat=1.18}
+
+\definecolor{MondrianRed}{HTML}{C83B32}
+\definecolor{MondrianBlue}{HTML}{315B91}
+\definecolor{MondrianYellow}{HTML}{E8BD45}
+\definecolor{MondrianBlack}{HTML}{171717}
+\definecolor{SoftGray}{HTML}{F3F4F2}
+\definecolor{MidGray}{HTML}{686B70}
+
+\setbeamercolor{normal text}{fg=MondrianBlack,bg=white}
+\setbeamercolor{structure}{fg=MondrianBlue}
+\setbeamercolor{frametitle}{fg=MondrianBlack,bg=white}
+\setbeamercolor{title}{fg=MondrianBlack}
+\setbeamercolor{block title}{fg=MondrianBlack,bg=SoftGray}
+\setbeamercolor{block body}{fg=MondrianBlack,bg=SoftGray}
+\setbeamercolor{alerted text}{fg=MondrianRed}
+\setbeamerfont{frametitle}{series=\bfseries,size=\Large}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{MondrianBlue}\small$\blacksquare$}
+\setbeamertemplate{itemize subitem}{\color{MondrianRed}\scriptsize$\blacksquare$}
+\setbeamertemplate{footline}{
+  \leavevmode
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.6ex,dp=1.1ex,sep=0pt]{normal text}
+    \hspace{1em}\color{MidGray}\scriptsize Quick Sort \hspace{.5em}\textbar\hspace{.5em} Estrutura de Dados \hspace{.5em}\textbar\hspace{.5em} UFRR
+    \hfill\color{MidGray}\scriptsize\insertframenumber\,/\,\inserttotalframenumber\hspace{1em}
+  \end{beamercolorbox}
+}
+\setbeamertemplate{frametitle}{
+  \vspace{.25em}
+  \insertframetitle\par
+  \vspace{-.45em}
+  {\color{MondrianBlack}\rule{\textwidth}{.45pt}}
+}
+\hypersetup{colorlinks=true,linkcolor=MondrianBlue,urlcolor=MondrianBlue,citecolor=MondrianBlue}
+
+\lstdefinestyle{code}{
+  language=C,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\bfseries\color{MondrianBlue},
+  commentstyle=\itshape\color{MidGray},
+  stringstyle=\color{MondrianRed},
+  numbers=left,
+  numberstyle=\tiny\color{MidGray},
+  numbersep=5pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{MondrianBlack},
+  xleftmargin=1em,
+  framexleftmargin=.7em,
+  tabsize=4,
+  columns=fullflexible
+}
+
+\newcommand{\citep}[1]{{\color{MidGray}\scriptsize\cite{#1}}}
+\newcommand{\key}[1]{\textbf{\color{MondrianBlue}#1}}
+\newcommand{\softbox}[2]{%
+  \begin{beamercolorbox}[wd=\linewidth,sep=.8em,rounded=false]{block body}
+    {\bfseries #1}\par\vspace{.25em}#2
+  \end{beamercolorbox}
+}
+\newcommand{\placeholder}[2]{%
+  \begin{tikzpicture}
+    \node[draw=MondrianBlack,line width=.7pt,minimum width=#1,minimum height=#2,
+      fill=SoftGray,align=center,text=MidGray] {\scriptsize Espaço para inserir figura\\[-1pt]
+      \tiny (captura de tela / foto / imagem)};
+  \end{tikzpicture}
+}
+
+\title[Quick Sort]{Quick Sort}
+\subtitle{Ideia, análise, variantes e evidências experimentais}
+\author{Nome do(a) aluno(a)}
+\institute{Universidade Federal de Roraima\\Departamento de Ciência da Computação\\Estrutura de Dados\\Prof. Filipe Dwan Pereira}
+\date{Data: \rule{2.1cm}{.4pt}}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[MondrianBlack] (current page.north west) rectangle ([xshift=.18cm]current page.south west);
+    \fill[MondrianBlue] ([xshift=.42cm,yshift=-.5cm]current page.north west) rectangle ([xshift=1.25cm,yshift=-2.4cm]current page.north west);
+    \fill[MondrianRed] ([xshift=1.43cm,yshift=-.5cm]current page.north west) rectangle ([xshift=2.15cm,yshift=-1.42cm]current page.north west);
+    \fill[MondrianYellow] ([xshift=.42cm,yshift=-2.6cm]current page.north west) rectangle ([xshift=1.25cm,yshift=-3.55cm]current page.north west);
+    \draw[MondrianBlack,line width=.8pt] ([xshift=.32cm,yshift=-.4cm]current page.north west) rectangle ([xshift=2.25cm,yshift=-3.7cm]current page.north west);
+  \end{tikzpicture}
+  \vspace{1.35cm}
+  \hspace{2.15cm}
+  \begin{minipage}{.75\textwidth}
+    {\color{MidGray}\small UNIVERSIDADE FEDERAL DE RORAIMA \textbar\ DCC}\par
+    \vspace{.55cm}
+    {\Huge\bfseries Quick Sort}\par
+    \vspace{.25cm}
+    {\large Da partição à engenharia de ordenação}\par
+    \vspace{.8cm}
+    {\normalsize Estrutura de Dados \textbar\ Prof. Filipe Dwan Pereira}\par
+    \vspace{.55cm}
+    {\small Nome: \rule{5cm}{.4pt}\hspace{1em} Data: \rule{2cm}{.4pt}}
+    \vfill
+    {\scriptsize Uma leitura algorítmica, histórica e experimental.}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Roteiro e pergunta central}
+  \begin{columns}[T,onlytextwidth]
+    \column{.57\textwidth}
+      \begin{enumerate}
+        \item O que caracteriza o Quick Sort e como surgiu?
+        \item Como a partição produz subproblemas menores?
+        \item O que acontece, passo a passo, com seis valores?
+        \item Por que o desempenho médio é bom, mas o pior caso é quadrático?
+        \item O que a implementação e os dados da \texttt{lesson11} permitem concluir?
+      \end{enumerate}
+    \column{.38\textwidth}
+      \softbox{Ideia em uma frase}{Escolher um pivô, particionar a sequência em torno dele e ordenar recursivamente os lados.}
+      \vspace{.15em}
+      \small
+      \textbf{Objetivo:} explicar a técnica com precisão e distinguir garantias teóricas de medições de uma execução.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{O problema de ordenação}
+  \begin{block}{Definição}
+    Dada uma sequência de chaves \(A=(a_0,\ldots,a_{n-1})\), produzir uma permutação \(A'\) tal que
+    \[
+      a'_0\leq a'_1\leq\cdots\leq a'_{n-1}.
+    \]
+    O conteúdo deve ser preservado; muda-se a ordem, não o multiconjunto de valores.
+  \end{block}
+  \vspace{.4em}
+  \begin{columns}[T,onlytextwidth]
+    \column{.47\textwidth}
+      \textbf{Propriedade de ordenação}\\
+      Cada elemento aparece na posição compatível com a relação de ordem.
+    \column{.47\textwidth}
+      \textbf{Propriedade de permutação}\\
+      Nenhuma chave é perdida, criada ou duplicada durante o processo.
+  \end{columns}
+  \vfill
+  \citep{cormen2022,knuth1998}
+\end{frame}
+
+\begin{frame}{Contexto histórico: uma ideia que virou família}
+  \begin{center}
+    \begin{tikzpicture}[x=1cm,y=1cm]
+      \draw[MondrianBlack,line width=1pt,-{Stealth[length=2mm]}] (0,0) -- (12.2,0);
+      \foreach \x/\yr/\txt/\col in {
+        1/1960/{Hoare concebe o método}/MondrianBlue,
+        3.8/1962/{Artigo ``Quicksort''}/MondrianRed,
+        6.7/1976/{Dijkstra: bandeira holandesa}/MondrianYellow,
+        9.4/1993/{Bentley--McIlroy: engenharia}/MondrianBlue,
+        11.4/1997/{Musser: introsort}/MondrianRed%
+      } {
+        \draw[MondrianBlack] (\x,0) -- (\x,.38);
+        \fill[\col] (\x-.075,.32) rectangle (\x+.075,.47);
+        \node[align=center,text width=2.2cm,font=\scriptsize] at (\x,1.05) {\txt};
+        \node[font=\bfseries\scriptsize] at (\x,-.35) {\yr};
+      }
+    \end{tikzpicture}
+  \end{center}
+  \vspace{.2em}
+  \begin{itemize}
+    \item C. A. R. Hoare concebeu o algoritmo por volta de 1960; o artigo seminal saiu em 1962.
+    \item O desenvolvimento posterior não é um único algoritmo: há diferentes partições, seleções de pivô e estratégias para casos especiais.
+  \end{itemize}
+  \citep{hoare1962,sedgwick2011,dijkstra1976,bentley1993,musser1997}
+\end{frame}
+
+\begin{frame}{O que significa particionar?}
+  \begin{columns}[T,onlytextwidth]
+    \column{.59\textwidth}
+      Para um subvetor e pivô \(p\), uma partição correta estabelece:
+      \[
+      \underbrace{A[lo..q-1]}_{\leq p}\quad
+      \underbrace{A[q]}_{p}\quad
+      \underbrace{A[q+1..hi-1]}_{\geq p}
+      \]
+      \begin{itemize}
+        \item O pivô termina em uma posição definitiva \(q\).
+        \item Os dois lados ainda podem estar desordenados.
+        \item Ordenam-se os lados; não é necessário juntar (merge) depois.
+      \end{itemize}
+    \column{.37\textwidth}
+      \begin{tikzpicture}[x=.68cm,y=.68cm]
+        \foreach \x/\v in {0/2,1/1,2/3,3/9,4/6,5/5} {
+          \draw[MondrianBlack] (\x,0) rectangle ++(.86,.7);
+          \node at (\x+.43,.35) {\small \v};
+        }
+        \draw[MondrianBlue,very thick] (0,-.18) -- (2.86,-.18);
+        \draw[MondrianBlack,very thick] (2.86,-.18) -- (3.86,-.18);
+        \draw[MondrianRed,very thick] (3.86,-.18) -- (5.86,-.18);
+        \node[font=\scriptsize,align=center] at (1.4,-.68) {menores};
+        \node[font=\scriptsize,align=center] at (3.35,-.68) {pivô};
+        \node[font=\scriptsize,align=center] at (4.85,-.68) {maiores};
+      \end{tikzpicture}
+      \vspace{.5em}
+      \small As relações exatas (\(<\), \(\leq\), etc.) dependem do esquema de partição e do tratamento de chaves iguais.
+  \end{columns}
+  \vfill
+  \citep{cormen2022,sedgwick2011}
+\end{frame}
+
+\begin{frame}{Dividir e conquistar: recorrência e custo}
+  \begin{columns}[T,onlytextwidth]
+    \column{.53\textwidth}
+      Se a partição deixa \(k\) elementos à esquerda:
+      \[
+        T(n)=T(k)+T(n-k-1)+\Theta(n).
+      \]
+      \begin{itemize}
+        \item Partições equilibradas: \(T(n)=\Theta(n\log n)\).
+        \item Partições extremas: \(T(n)=\Theta(n^2)\).
+        \item Para chaves distintas e pivô aleatório, o número esperado de comparações é \(2(n+1)H_n-4n\), aproximadamente \(2n\ln n\).
+      \end{itemize}
+    \column{.43\textwidth}
+      \softbox{Leitura da recursão}{Cada chamada paga pelo percurso da partição e depois resolve dois intervalos. O pivô é retirado dos subproblemas.}
+      \vspace{.45em}
+      \small
+      \textbf{Espaço auxiliar:} \(O(1)\) para particionar in-place; além disso, a pilha recursiva é \(O(\log n)\) em divisões equilibradas e \(O(n)\) no pior caso.
+  \end{columns}
+  \vfill
+  \citep{cormen2022,sedgwick2011}
+\end{frame}
+
+\begin{frame}{Um detalhe importante: Hoare e Lomuto não são a mesma partição}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{>{\bfseries}p{2.5cm} X X}
+    \toprule
+    & Esquema de Hoare & Esquema Lomuto-style \\
+    \midrule
+    Movimento & Dois índices avançam de lados opostos. & Um índice de varredura e uma fronteira para os menores. \\
+    Pivô & Nem sempre retorna já na posição final. & O pivô final é trocado para a fronteira. \\
+    Recursão & Respeita a fronteira devolvida pela partição. & Exclui a posição final do pivô. \\
+    Observação & Pode fazer menos trocas em certos dados. & É simples de explicar, mas pode trocar muitas vezes e degradar com chaves iguais. \\
+    \bottomrule
+  \end{tabularx}
+  \vspace{.35em}
+  \begin{beamercolorbox}[wd=\linewidth,sep=.45em]{block body}
+    \scriptsize\textbf{Na \texttt{lesson11}:} o pivô é \texttt{values[right - 1]}; \texttt{store} avança para valores estritamente menores e, ao fim, recebe o pivô. É uma partição do tipo Lomuto.
+  \end{beamercolorbox}
+  \vfill
+  \citep{cormen2022,sedgwick2011}
+\end{frame}
+
+\begin{frame}{Passo a passo (1/2): seis números, pivô 3}
+  \small
+  Entrada: \([5,\,2,\,9,\,1,\,6,\,3]\). Índices começam em zero; pivô é o último item.
+  \vspace{.3em}
+  \begin{tabularx}{\textwidth}{c c c X}
+    \toprule
+    \(j\) & Valor & Teste & Vetor após o passo \\
+    \midrule
+    -- & -- & Estado inicial; \texttt{store}=0 & \([5,2,9,1,6,3]\) \\
+    0 & 5 & \(5<3\)? não & \([5,2,9,1,6,3]\) \\
+    1 & 2 & \(2<3\)? sim; troca \(A[0]\leftrightarrow A[1]\) & \([2,5,9,1,6,3]\) \\
+    2 & 9 & \(9<3\)? não & \([2,5,9,1,6,3]\) \\
+    3 & 1 & \(1<3\)? sim; troca \(A[1]\leftrightarrow A[3]\) & \([2,1,9,5,6,3]\) \\
+    4 & 6 & \(6<3\)? não & \([2,1,9,5,6,3]\) \\
+    \bottomrule
+  \end{tabularx}
+  \vspace{.55em}
+  \begin{center}
+    \texttt{store}=2; valores menores que 3 estão à esquerda da fronteira. A varredura terminou.
+  \end{center}
+\end{frame}
+
+\begin{frame}{Passo a passo (2/2): fixar o pivô e recursar}
+  \small
+  \begin{enumerate}
+    \item Trocar \(A[\texttt{store}]\) com o pivô: \([2,1,3,5,6,9]\). O 3 está na posição final 2.
+    \item Recursar à esquerda: \([2,1]\), pivô 1 \(\rightarrow [1,2]\).
+    \item Recursar à direita: \([5,6,9]\), pivô 9 \(\rightarrow [5,6,9]\).
+    \item Juntar não é necessário: a concatenação dos intervalos e do pivô já dá a ordem.
+  \end{enumerate}
+  \vspace{.5em}
+  \begin{center}
+    \begin{tikzpicture}[node distance=.35cm]
+      \node[draw=MondrianBlack,fill=SoftGray,inner sep=6pt] (root) {\([5,2,9,1,6,3]\)};
+      \node[draw=MondrianBlue,inner sep=5pt,below left=of root] (left) {\([2,1]\)};
+      \node[draw=MondrianRed,inner sep=5pt,below right=of root] (right) {\([5,6,9]\)};
+      \draw[-{Stealth},MondrianBlack] (root) -- (left);
+      \draw[-{Stealth},MondrianBlack] (root) -- (right);
+      \node[draw=MondrianBlack,fill=SoftGray,inner sep=5pt,below=1.15cm of root] (done) {\([1,2,3,5,6,9]\)};
+      \draw[-{Stealth},MondrianBlack] (left) -- (done);
+      \draw[-{Stealth},MondrianBlack] (right) -- (done);
+    \end{tikzpicture}
+  \end{center}
+  \small Esta execução ilustra o rastreamento do código usado na implementação, não todas as variantes de Quick Sort.
+\end{frame}
+
+\begin{frame}{Pseudocódigo: partição Lomuto e Quick Sort}
+  \small
+  \begin{columns}[T,onlytextwidth]
+    \column{.49\textwidth}
+      \textbf{Particionar o intervalo \([lo,hi)\)}
+      \begin{enumerate}
+        \item \(p \gets A[hi-1]\); \(s \gets lo\)
+        \item Para \(j=lo,\ldots,hi-2\):
+        \begin{itemize}
+          \item se \(A[j]<p\), trocar \(A[j]\) com \(A[s]\); \(s\gets s+1\)
+        \end{itemize}
+        \item Trocar \(A[s]\) com \(A[hi-1]\)
+        \item Devolver \(s\)
+      \end{enumerate}
+    \column{.49\textwidth}
+      \textbf{Ordenar}
+      \begin{enumerate}
+        \item Se \(hi-lo<2\), retornar.
+        \item \(q\gets\operatorname{Particionar}(A,lo,hi)\)
+        \item Ordenar \(A[lo..q)\)
+        \item Ordenar \(A[q+1..hi)\)
+      \end{enumerate}
+      \vspace{.4em}
+      \softbox{Invariante}{Durante a varredura, \(A[lo..s-1]<p\); os elementos ainda não examinados ficam à direita do índice \(j\).}
+  \end{columns}
+  \vfill
+  \citep{cormen2022}
+\end{frame}
+
+\begin{frame}[fragile]{C: implementação da partição}
+  \begin{lstlisting}[style=code]
+static size_t partition(int *a, size_t lo, size_t hi)
+{
+    int pivot = a[hi - 1];
+    size_t store = lo;
+
+    for (size_t j = lo; j + 1 < hi; ++j) {
+        if (a[j] < pivot) {
+            int tmp = a[j];
+            a[j] = a[store];
+            a[store] = tmp;
+            ++store;
+        }
+    }
+
+    int tmp = a[store];
+    a[store] = a[hi - 1];
+    a[hi - 1] = tmp;
+    return store;
+}
+  \end{lstlisting}
+  \vspace{.05em}
+  \scriptsize Pivô no último índice do intervalo semiaberto \([lo,hi)\); a partição devolve sua posição definitiva.
+\end{frame}
+
+\begin{frame}[fragile]{C: recursão sobre os intervalos}
+  \begin{lstlisting}[style=code]
+static void quick_sort(int *a, size_t lo, size_t hi)
+{
+    if (hi - lo < 2) return;
+    size_t q = partition(a, lo, hi);
+    quick_sort(a, lo, q);
+    quick_sort(a, q + 1, hi);
+}
+  \end{lstlisting}
+  \vspace{-.2em}
+  \small A chamada inicial para \(n\) elementos é \texttt{quick\_sort(a, 0, n)}. O código da \texttt{lesson11} acrescenta métricas e atualização de progresso.
+\end{frame}
+
+\begin{frame}{Propriedades: o que o Quick Sort oferece (e não oferece)}
+  \begin{columns}[T,onlytextwidth]
+    \column{.48\textwidth}
+      \softbox{Pontos fortes}{\begin{itemize}
+        \item Bom desempenho médio: \(\Theta(n\log n)\).
+        \item Particionamento in-place, com boa localidade de acesso.
+        \item Laço interno compacto; baixo custo auxiliar fora da pilha.
+        \item Pode ser adaptado a distintos tipos de dados e padrões.
+      \end{itemize}}
+    \column{.48\textwidth}
+      \softbox{Limitações}{\begin{itemize}
+        \item Pior caso \(\Theta(n^2)\) com partições repetidamente desequilibradas.
+        \item Versão recursiva pode usar \(O(n)\) de pilha.
+        \item Não é estável em sua forma usual.
+        \item Resultado depende da política de pivô, da partição e de chaves repetidas.
+      \end{itemize}}
+  \end{columns}
+  \vspace{.6em}
+  \begin{center}
+    \small     ``In-place'' não significa memória total \(O(1)\): a recursão também ocupa espaço.
+  \end{center}
+  \citep{cormen2022,knuth1998,sedgwick2011}
+\end{frame}
+
+\begin{frame}{Quando o pivô dá errado?}
+  \begin{columns}[T,onlytextwidth]
+    \column{.53\textwidth}
+      Considere \(1,2,3,4,5\) com o maior elemento sempre escolhido como pivô:
+      \[
+      4+3+2+1=\frac{n(n-1)}2
+      \]
+      comparações no caso extremo.
+      \begin{itemize}
+        \item Pivô fixo pode ser vulnerável a entradas já ordenadas ou construídas para a implementação.
+        \item Entradas com muitas chaves iguais exigem tratamento consciente.
+      \end{itemize}
+    \column{.43\textwidth}
+      \begin{tikzpicture}[x=.61cm,y=.48cm]
+        \foreach \y/\len in {3/5,2/4,1/3,0/2} {
+          \draw[MondrianBlack] (0,\y) rectangle (\len,\y+.35);
+          \fill[MondrianRed] (\len-.38,\y) rectangle (\len,\y+.35);
+        }
+        \node[font=\scriptsize,align=left] at (2.25,-.65) {Um lado quase vazio\\a cada partição};
+      \end{tikzpicture}
+  \end{columns}
+  \vfill
+  \citep{cormen2022,nist}
+\end{frame}
+
+\begin{frame}{Chaves repetidas: partição em três vias}
+  \small
+  Separar em três regiões: \(<p\), \(=p\) e \(>p\). A região igual não precisa ser recursada.
+  \begin{center}
+    \begin{tikzpicture}[x=.76cm,y=.75cm]
+      \foreach \x/\v/\c in {0/2/MondrianBlue,1/2/MondrianBlue,2/4/MondrianYellow,3/4/MondrianYellow,4/4/MondrianYellow,5/7/MondrianRed,6/9/MondrianRed} {
+        \draw[MondrianBlack] (\x,0) rectangle ++(.86,.68);
+        \node at (\x+.43,.34) {\v};
+      }
+      \draw[decorate,decoration={brace,amplitude=4pt},MondrianBlack] (0,-.12) -- (1.86,-.12);
+      \draw[decorate,decoration={brace,amplitude=4pt},MondrianBlack] (2,-.12) -- (4.86,-.12);
+      \draw[decorate,decoration={brace,amplitude=4pt},MondrianBlack] (5,-.12) -- (6.86,-.12);
+      \node[font=\scriptsize] at (.93,-.62) {\(<p\)};
+      \node[font=\scriptsize] at (3.43,-.62) {\(=p\)};
+      \node[font=\scriptsize] at (5.93,-.62) {\(>p\)};
+    \end{tikzpicture}
+  \end{center}
+  \begin{itemize}
+    \item A solução de Dijkstra para a ``bandeira holandesa'' mantém fronteiras para as três regiões.
+    \item Em dados com muitas duplicatas, essa técnica evita recursão inútil sobre valores iguais; Bentley--McIlroy a incorporaram a uma implementação prática de ordenação.
+    \item A implementação da \texttt{lesson11} não é tri-partida: usa comparação estrita \texttt{< pivot}.
+  \end{itemize}
+  \citep{dijkstra1976,bentley1993,sedgwick2011}
+\end{frame}
+
+\begin{frame}{Melhorias modernas: Quick Sort como componente}
+  \small
+  \begin{tabularx}{\textwidth}{>{\bfseries}p{3.1cm} X}
+    \toprule
+    Técnica & O que busca resolver \\
+    \midrule
+    Pivô aleatório & Reduz a dependência de uma entrada adversa fixa; expectativa \(O(n\log n)\). \\
+    Mediana de três / amostragem & Evita pivôs extremos em padrões comuns, sem garantir o pior caso. \\
+    Partição em três vias & Trata chaves repetidas com uma única região de igualdade. \\
+    Inserção em intervalos pequenos & Diminui custos constantes e chamadas recursivas curtas. \\
+    Introsort & Monitora a profundidade e recorre ao Heapsort para limitar o pior caso a \(O(n\log n)\). \\
+    Dual-pivot / variantes adaptativas & Exploram políticas diferentes de partição e padrões dos dados; desempenho depende da implementação. \\
+    \bottomrule
+  \end{tabularx}
+  \vspace{.55em}
+  \small
+  Exemplo de uso em biblioteca: a documentação de Java descreve Dual-Pivot Quicksort para certas ordenações de arrays primitivos. A estratégia concreta de \texttt{std::sort} depende da biblioteca; não se deve inferir uma implementação a partir apenas do nome da API.
+  \citep{musser1997,bentley1993,javaarrays}
+\end{frame}
+
+\begin{frame}{Comparação com outros algoritmos do trabalho}
+  \scriptsize
+  \begin{tabularx}{\textwidth}{>{\bfseries}p{2.05cm} p{2.05cm} p{1.25cm} p{1.35cm} X}
+    \toprule
+    Algoritmo & Tempo típico / pior & Estável? & In-place? & Observação principal \\
+    \midrule
+    Quick Sort & \(n\log n\) / \(n^2\) & Não & Em geral & Rápido na prática; o pivô importa. \\
+    Merge Sort & \(n\log n\) / \(n\log n\) & Sim* & Não* & Garantia de pior caso; memória auxiliar. \\
+    Heap Sort & \(n\log n\) / \(n\log n\) & Não & Sim & Pior caso garantido; acesso menos sequencial. \\
+    Insertion Sort & \(n^2\) / \(n^2\) & Sim & Sim & Simples e eficiente para entradas pequenas/quase ordenadas. \\
+    Selection Sort & \(n^2\) / \(n^2\) & Não* & Sim & Poucas trocas; muitas comparações. \\
+    Bubble Sort & \(n^2\) / \(n^2\) & Sim* & Sim & Didático; depende da otimização para parar cedo. \\
+    Radix Sort & \(d(n+b)\) / \(d(n+b)\) & Depende & Não* & Não compara chaves; custo depende da representação e base. \\
+    \bottomrule
+  \end{tabularx}
+  \vspace{.4em}
+  \tiny \(*\) Propriedades da versão usual/implementação estável, não de todo algoritmo que compartilha o nome. \(d\): número de dígitos/passagens; \(b\): base ou tamanho do alfabeto.
+  \vfill
+  \citep{cormen2022,ziviani2011,knuth1998}
+\end{frame}
+
+\begin{frame}{Busca: o que muda quando os dados estão ordenados?}
+  \begin{columns}[T,onlytextwidth]
+    \column{.48\textwidth}
+      \softbox{Busca sequencial}{Examina itens até encontrar a chave ou chegar ao fim.\\[.3em]
+      Pior caso: \(O(n)\). Não exige ordenação.}
+    \column{.48\textwidth}
+      \softbox{Busca binária}{Compara com o elemento central e descarta metade do intervalo a cada etapa.\\[.3em]
+      Pior caso: \(O(\log n)\). Exige sequência ordenada e acesso indexado eficiente.}
+  \end{columns}
+  \vspace{.65em}
+  \begin{center}
+    \small
+    Na \texttt{lesson11}, o benchmark de buscas usa 10.000 chaves e 10.000 consultas pseudoaleatórias: sequencial no vetor original e binária em uma cópia ordenada.
+  \end{center}
+  \citep{cormen2022}
+\end{frame}
+
+\begin{frame}{Metodologia experimental da \texttt{lesson11}}
+  \begin{itemize}
+    \item O módulo executa cada algoritmo sobre arquivos de entrada de \(100\), \(1.000\), \(10.000\) e \(100.000\) inteiros.
+    \item Mede o intervalo da chamada ao algoritmo com contador de alta resolução do Windows; o tempo de gravação do arquivo é posterior à medição.
+    \item Os arquivos ordenados preservam os valores da entrada. A checagem local dos 21 resultados disponíveis confirmou ordem não decrescente e mesmo multiconjunto.
+    \item Os nomes dos arquivos guardam o tempo arredondado para microssegundos inteiros ou milissegundos inteiros; os arquivos não registram máquina, compilador, repetições ou dispersão.
+  \end{itemize}
+  \vspace{.45em}
+  \softbox{Escopo observado}{Há artefatos de dados para sete ordenações até \(10.000\) elementos. Para \(100.000\), há resultados de Heap, Merge, Quick e Radix; não há arquivos dessa dimensão para Bubble, Insertion e Selection.}
+  \vfill
+  \tiny Fonte: \texttt{problems/lesson11/problem\_110.c}, \texttt{search-benchmark.c} e \texttt{data/}.
+\end{frame}
+
+\begin{frame}{Expectativa teórica: crescimento, não previsão de milissegundos}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=.84\textwidth,height=5.1cm,
+      xmode=log,ymode=log,
+      log basis x=10,log basis y=10,
+      xlabel={Tamanho \(n\) (escala logarítmica)},
+      ylabel={Operações normalizadas (escala logarítmica)},
+      xmin=100,xmax=100000,ymin=.7,ymax=2000000,
+      xtick={100,1000,10000,100000},
+      xticklabels={100,1.000,10.000,100.000},
+      ymajorgrids=true,xmajorgrids=true,
+      grid style={draw=SoftGray},
+      legend style={at={(.02,.98)},anchor=north west,draw=none,fill=white,font=\scriptsize},
+      tick label style={font=\scriptsize},
+      label style={font=\scriptsize}
+    ]
+      \addplot[very thick,MondrianBlue,mark=square*] coordinates {(100,1) (1000,15.05) (10000,200.1) (100000,250.1)};
+      \addlegendentry{\(n\log_2 n\), normalizado em \(n=100\)}
+      \addplot[very thick,MondrianRed,mark=*] coordinates {(100,1) (1000,100) (10000,10000) (100000,1000000)};
+      \addlegendentry{\(n^2\), normalizado em \(n=100\)}
+    \end{axis}
+  \end{tikzpicture}
+  \vspace{-.1em}
+  \small Curvas assintóticas ilustrativas: Quick Sort balanceado segue a tendência \(n\log n\); partições extremas seguem \(n^2\). Não são tempos medidos.
+\end{frame}
+
+\begin{frame}{Resultados práticos registrados: crescimento por tamanho}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=.88\textwidth,height=5.5cm,
+      ymode=log,log basis y=10,
+      xlabel={Número de elementos},
+      ylabel={Tempo codificado no nome do arquivo (ms; log)},
+      xmin=100,xmax=100000,ymin=.004,ymax=200,
+      xtick={100,1000,10000,100000},
+      xticklabels={100,1.000,10.000,100.000},
+      ymajorgrids=true,xmajorgrids=true,
+      grid style={draw=SoftGray},
+      legend columns=4,
+      legend style={at={(.5,-.22)},anchor=north,draw=none,font=\tiny},
+      tick label style={font=\scriptsize},
+      label style={font=\scriptsize},
+      clip=false
+    ]
+      \addplot[mark=square*,MondrianRed,thick] coordinates {(100,.022) (1000,2) (10000,117)};
+      \addlegendentry{Bubble}
+      \addplot[mark=triangle*,MondrianBlue,thick] coordinates {(100,.006) (1000,.091) (10000,1) (100000,13)};
+      \addlegendentry{Heap}
+      \addplot[mark=*,MondrianBlack,thick] coordinates {(100,.008) (1000,.709) (10000,48)};
+      \addlegendentry{Insertion}
+      \addplot[mark=diamond*,MondrianYellow,thick] coordinates {(100,.008) (1000,.090) (10000,.920) (100000,11)};
+      \addlegendentry{Merge}
+      \addplot[mark=pentagon*,MondrianBlue,dashed,thick] coordinates {(100,.005) (1000,.064) (10000,.750) (100000,10)};
+      \addlegendentry{Quick}
+      \addplot[mark=oplus,MondrianRed,dashed,thick] coordinates {(100,.012) (1000,.110) (10000,1) (100000,9)};
+      \addlegendentry{Radix}
+      \addplot[mark=x,MondrianBlack,dashed,thick] coordinates {(100,.013) (1000,1) (10000,90)};
+      \addlegendentry{Selection}
+    \end{axis}
+  \end{tikzpicture}
+  \vspace{-.1em}
+  \tiny Tempos aproximados a partir dos sufixos dos arquivos \texttt{data/*-sort/*}. Os pontos de \(100.000\) estão disponíveis somente para Heap, Merge, Quick e Radix; o gráfico não interpola dados ausentes.
+\end{frame}
+
+\begin{frame}{Curvas teóricas versus medidas: escala relativa}
+  \scriptsize
+  \begin{columns}[T,onlytextwidth]
+    \column{.48\textwidth}
+      \textbf{Previsão assintótica normalizada}
+      \begin{tabularx}{\linewidth}{>{\bfseries}l r r r r}
+        \toprule
+        Modelo & 100 & 1.000 & 10.000 & 100.000 \\
+        \midrule
+        \(n\log_2 n\) & 1 & 15,1 & 200,1 & 2.501 \\
+        \(n^2\) & 1 & 100 & 10.000 & 1.000.000 \\
+        \(n\) & 1 & 10 & 100 & 1.000 \\
+        \bottomrule
+      \end{tabularx}
+      \vspace{.35em}
+      \tiny A normalização elimina a constante desconhecida e permite comparar a forma do crescimento.
+    \column{.48\textwidth}
+      \textbf{Tempos medidos normalizados}
+      \begin{tabularx}{\linewidth}{>{\bfseries}l r r r r}
+        \toprule
+        Algoritmo & 100 & 1.000 & 10.000 & 100.000 \\
+        \midrule
+        Quick & 1 & 12,8 & 150 & 2.000 \\
+        Heap & 1 & 15,2 & 166,7 & 2.166,7 \\
+        Merge & 1 & 11,3 & 115 & 1.375 \\
+        Radix & 1 & 9,2 & 83,3 & 750 \\
+        \bottomrule
+      \end{tabularx}
+      \vspace{.35em}
+      \tiny Base: o menor arquivo de cada algoritmo; valores aproximados pelos nomes dos arquivos.
+  \end{columns}
+  \vspace{.5em}
+  \begin{beamercolorbox}[wd=\linewidth,sep=.55em]{block body}
+    \textbf{Leitura:} Quick, Heap e Merge crescem na mesma ordem de grandeza esperada para \(n\log n\), embora suas constantes e arredondamentos sejam diferentes. Radix apresenta crescimento próximo de linear nesta faixa, coerente com \(d\) e a base fixados, mas não é diretamente comparável a um algoritmo baseado em comparações.
+  \end{beamercolorbox}
+\end{frame}
+
+\begin{frame}{Comparação por algoritmo: previsão e evidência}
+  \scriptsize
+  \begin{tabularx}{\textwidth}{>{\bfseries}p{1.7cm} p{2.1cm} p{2.5cm} X}
+    \toprule
+    Algoritmo & Previsão teórica & Curva observada & Conclusão para esta execução \\
+    \midrule
+    Quick Sort & Médio \(n\log n\); pior \(n^2\) & \(0,005 \to 10\) ms; fator \(\approx 2.000\) & A série observada acompanha a família \(n\log n\); pivô final e entrada aleatória não produziram degradação quadrática. \\
+    Heap Sort & \(n\log n\) em todos os casos & \(0,006 \to 13\) ms; fator \(\approx 2.167\) & Crescimento próximo ao de Quick/Merge; oferece garantia de pior caso. \\
+    Merge Sort & \(n\log n\) em todos os casos & \(0,008 \to 11\) ms; fator \(\approx 1.375\) & Compatível com \(n\log n\), com constante favorável nesta medição. \\
+    Radix Sort & \(d(n+b)\); linear se \(d,b\) fixos & \(0,012 \to 9\) ms; fator \(\approx 750\) & Crescimento mais próximo de \(n\) na faixa; depende do domínio numérico e da implementação. \\
+    Insertion Sort & \(n^2\) no pior/médio caso & \(0,008 \to 48\) ms em 10 mil; 100 mil ausente & A forte subida entre 1 mil e 10 mil é compatível com custo quadrático; não extrapolar como medição. \\
+    Selection Sort & \(n^2\) & \(0,013 \to 79\) ms em 10 mil; 100 mil ausente & Tendência quadrática aparente; a ausência de 100 mil impede afirmar o tempo real. \\
+    Bubble Sort & \(n^2\) (versão usual) & \(0,022 \to 117\) ms em 10 mil; 100 mil ausente & Maior custo entre os quadráticos medidos; não há curva observada em 100 mil. \\
+    \bottomrule
+  \end{tabularx}
+  \vspace{.1em}
+  \tiny ``Compatível'' significa que os pontos não contradizem a ordem de crescimento esperada; não é uma prova estatística da complexidade.
+\end{frame}
+
+\begin{frame}{Como interpretar as curvas sem confundir teoria e prática}
+  \small
+  \begin{enumerate}
+    \item \textbf{Teoria:} compara ordens de crescimento quando \(n\) aumenta; ignora constantes, hardware, cache e implementação.
+    \item \textbf{Prática:} os nomes dos arquivos registram uma execução arredondada; pontos próximos podem parecer iguais por causa da resolução.
+    \item \textbf{Curvas paralelas:} Quick, Heap e Merge mantêm crescimento semelhante no gráfico de 100 a 100.000.
+    \item \textbf{Curvas ausentes:} não há ponto de 100.000 para Bubble, Insertion e Selection; uma linha não deve ser inventada por extrapolação.
+    \item \textbf{Radix:} sua previsão depende de \(d\) e \(b\); a comparação com \(n\log n\) é uma comparação de modelos, não de operações equivalentes.
+  \end{enumerate}
+  \vspace{.15em}
+  \softbox{Mensagem para a banca}{Os dados são coerentes com as previsões assintóticas nas entradas observadas, mas a conclusão deve ser limitada ao ambiente, às entradas e aos arquivos efetivamente medidos.}
+\end{frame}
+
+\begin{frame}{Leitura dos resultados: o que os dados sustentam}
+  \scriptsize
+  \begin{tabularx}{\textwidth}{>{\bfseries}p{2.05cm} c c c c X}
+    \toprule
+    Algoritmo & \(n=100\) & \(n=1.000\) & \(n=10.000\) & \(n=100.000\) & Leitura cuidadosa \\
+    \midrule
+    Quick Sort & 5 \(\mu s\) & 64 \(\mu s\) & 750 \(\mu s\) & 10 ms & Menor tempo registrado nos quatro tamanhos disponíveis. \\
+    Heap Sort & 6 \(\mu s\) & 91 \(\mu s\) & 1 ms & 13 ms & Crescimento compatível com \(n\log n\). \\
+    Merge Sort & 8 \(\mu s\) & 90 \(\mu s\) & 920 \(\mu s\) & 11 ms & Mesmo patamar assintótico de Quick e Heap. \\
+    Insertion Sort & 8 \(\mu s\) & 709 \(\mu s\) & 48 ms & -- & Não há arquivo de 100 mil. \\
+    Selection Sort & 13 \(\mu s\) & 1 ms & 79 ms & -- & Não há arquivo de 100 mil; custo quadrático sugere crescimento elevado. \\
+    Bubble Sort & 22 \(\mu s\) & 1 ms & 117 ms & -- & Não há arquivo de 100 mil; custo quadrático sugere crescimento elevado. \\
+    Radix Sort & 12 \(\mu s\) & 110 \(\mu s\) & 1 ms & 9 ms & Melhor resultado registrado em 100 mil nesta amostra. \\
+    \bottomrule
+  \end{tabularx}
+  \vspace{.1em}
+  \tiny Nomes consultados: \texttt{100000\_13ms.txt}, \texttt{100000\_11ms.txt}, \texttt{100000\_10ms.txt} e \texttt{100000\_9ms.txt}; tempos arredondados pela rotina de gravação.
+\end{frame}
+
+\begin{frame}{O que não se pode concluir apenas com esses tempos}
+  \begin{itemize}
+    \item Uma execução por algoritmo/tamanho não estima variabilidade nem intervalo de confiança.
+    \item Resolução diferente entre microssegundos e milissegundos esconde diferenças em alguns pontos.
+    \item Não foram registrados aqui CPU, sistema, compilador, flags, estado de cache ou distribuição detalhada das entradas.
+    \item Quick Sort é o menor tempo \textit{registrado} nesta amostra, mas isso não prova superioridade universal.
+  \end{itemize}
+  \vspace{.4em}
+  \softbox{Como fortalecer o experimento}{Executar várias repetições; usar as mesmas entradas e cópias independentes; relatar mediana e dispersão; registrar compilador/flags e hardware; testar aleatória, ordenada, reversa e muitos valores iguais; completar os três algoritmos quadráticos em \(100.000\) somente se o custo for aceitável.}
+\end{frame}
+
+\begin{frame}{Por que ainda escolher Quick Sort?}
+  \begin{columns}[T,onlytextwidth]
+    \column{.48\textwidth}
+      \softbox{É uma boa escolha quando}{\begin{itemize}
+        \item dados cabem em memória;
+        \item estabilidade não é requisito;
+        \item desempenho médio e localidade são prioritários;
+        \item a implementação pode escolher boas políticas de pivô e fallback.
+      \end{itemize}}
+    \column{.48\textwidth}
+      \softbox{Considere alternativas quando}{\begin{itemize}
+        \item pior caso garantido é obrigatório (Heap/Merge/Introsort);
+        \item estabilidade é obrigatória (Merge);
+        \item dados são quase ordenados e pequenos (Insertion);
+        \item a chave tem estrutura explorável (Radix).
+      \end{itemize}}
+  \end{columns}
+  \vspace{.5em}
+  \begin{center}
+    \small A escolha é uma decisão de engenharia: modelo de dados, requisitos e implementação importam tanto quanto a notação assintótica.
+  \end{center}
+  \citep{knuth1998,cormen2022,ziviani2011}
+\end{frame}
+
+\begin{frame}{Conexão com o trabalho da disciplina}
+  \begin{columns}[T,onlytextwidth]
+    \column{.57\textwidth}
+      \begin{itemize}
+        \item A implementação integra o menu de comparação da \texttt{lesson11}.
+        \item A rotina acompanha comparações, movimentos e progresso.
+        \item Arquivos ordenados são gravados em \texttt{data/quick-sort/}.
+        \item Os artefatos disponíveis cobrem \(100\), \(1.000\), \(10.000\) e, parcialmente, \(100.000\) números; foram validados quanto à ordenação e preservação dos valores.
+      \end{itemize}
+      \vspace{.35em}
+      \scriptsize Fontes: \texttt{problems/lesson11/quick-sort.c}, \texttt{problem\_110.c} e \texttt{data/quick-sort/}.
+    \column{.4\textwidth}
+      \centering
+      \placeholder{5.2cm}{3.0cm}\\[-.2em]
+      \scriptsize Substituir por uma captura da tela de comparação ou do menu da \texttt{lesson11}.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Síntese}
+  \begin{enumerate}
+    \item Quick Sort ordena por partições sucessivas e é um exemplo clássico de dividir e conquistar.
+    \item A qualidade do particionamento determina a forma da recursão: \(n\log n\) quando equilibrada; \(n^2\) no pior caso.
+    \item A implementação da \texttt{lesson11} usa pivô final e partição Lomuto-style; duplicatas e pivôs extremos são pontos de atenção.
+    \item Variantes modernas combinam partições melhores com inserção, três vias ou fallback para limitar riscos.
+    \item Os resultados disponíveis favorecem Quick Sort nesta amostra, mas a conclusão deve respeitar resolução e limites experimentais.
+  \end{enumerate}
+  \vspace{.5em}
+  \begin{center}
+    \Large\bfseries Obrigado(a)!\\[-.1em]
+    \normalsize Perguntas?
+  \end{center}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Referências}
+  \footnotesize
+  \begin{thebibliography}{99}
+    \bibitem{hoare1962}
+      HOARE, C. A. R. Quicksort. \textit{The Computer Journal}, v. 5, n. 1, p. 10--16, 1962.
+      \href{https://doi.org/10.1093/comjnl/5.1.10}{doi:10.1093/comjnl/5.1.10}.
+
+    \bibitem{cormen2022}
+      CORMEN, T. H.; LEISERSON, C. E.; RIVEST, R. L.; STEIN, C.
+      \textit{Introduction to Algorithms}. 4. ed. MIT Press, 2022.
+
+    \bibitem{knuth1998}
+      KNUTH, D. E. \textit{The Art of Computer Programming, Volume 3: Sorting and Searching}.
+      2. ed. Addison-Wesley, 1998.
+
+    \bibitem{sedgwick2011}
+      SEDGEWICK, R.; WAYNE, K. \textit{Algorithms}. 4. ed. Addison-Wesley, 2011.
+      Material de apoio: \url{https://algs4.cs.princeton.edu/23quicksort/}.
+
+    \bibitem{dijkstra1976}
+      DIJKSTRA, E. W. \textit{A Discipline of Programming}. Prentice-Hall, 1976.
+
+    \bibitem{bentley1993}
+      BENTLEY, J. L.; McILROY, M. D. Engineering a sort function.
+      \textit{Software: Practice and Experience}, v. 23, n. 11, p. 1249--1265, 1993.
+      \href{https://doi.org/10.1002/spe.4380231105}{doi:10.1002/spe.4380231105}.
+
+    \bibitem{musser1997}
+      MUSSER, D. R. Introspective sorting and selection algorithms.
+      \textit{Software: Practice and Experience}, v. 27, n. 8, p. 983--993, 1997.
+      \href{https://doi.org/10.1002/(SICI)1097-024X(199708)27:8\%3C983::AID-SPE117\%3E3.0.CO;2-\%23}
+      {doi:10.1002/(SICI)1097-024X(199708)27:8<983::AID-SPE117>3.0.CO;2-\#}.
+
+    \bibitem{ziviani2011}
+      ZIVIANI, N. \textit{Projeto de Algoritmos: com implementações em Pascal e C}.
+      3. ed. Cengage Learning, 2011.
+
+    \bibitem{nist}
+      MARTINEZ, C. Quicksort. In: BLACK, P. E. (ed.). \textit{Dictionary of Algorithms and Data Structures}.
+      NIST, 2023. Disponível em: \url{https://xlinux.nist.gov/dads/HTML/quicksort.html}.
+
+    \bibitem{javaarrays}
+      ORACLE. \textit{Java Platform, Standard Edition 8 API Specification: Arrays}.
+      Nota de implementação sobre Dual-Pivot Quicksort.
+      \url{https://docs.oracle.com/javase/8/docs/api/java/util/Arrays.html}.
+
+    \bibitem{lesson11}
+      CARAUMA, J. A. Repositório \textit{art-mondrian}, módulo \texttt{problems/lesson11}.
+      Código e dados experimentais da implementação. Disponível em:
+      \url{https://github.com/carauma7/art-mondrian}.
+  \end{thebibliography}
+\end{frame}
+
+\end{document}
