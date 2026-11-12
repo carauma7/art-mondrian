@@ -1,20 +1,38 @@
 #include "problem_110.h"
 #include "sequential-search.h"
 
-static void run_sequential_search(int *values, size_t count, int target, Lesson11Metrics *metrics)
+static int find_sequential(
+    const int *values,
+    size_t count,
+    int target,
+    Lesson11Metrics *metrics)
 {
     size_t i;
     for (i = 0; i < count; i++)
     {
-        metrics->comparisons++;
-        if ((i & 1023U) == 0) lesson11_algorithm_progress("Busca Sequencial", i, count);
+        if (metrics != NULL)
+        {
+            metrics->comparisons++;
+            if ((i & 1023U) == 0)
+                lesson11_algorithm_progress("Busca Sequencial", i, count);
+        }
         if (values[i] == target)
         {
-            metrics->found = 1;
-            return;
+            return 1;
         }
-        lesson11_algorithm_progress("Busca Sequencial", count, count);
     }
+    return 0;
+}
+
+int sequential_search_contains(const int *values, size_t count, int target)
+{
+    return find_sequential(values, count, target, NULL);
+}
+
+static void run_sequential_search(int *values, size_t count, int target, Lesson11Metrics *metrics)
+{
+    metrics->found = find_sequential(values, count, target, metrics);
+    lesson11_algorithm_progress("Busca Sequencial", count, count);
 }
 
 static const Lesson11AlgorithmInfo sequential_search_info = {

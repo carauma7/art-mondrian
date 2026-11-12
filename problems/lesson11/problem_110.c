@@ -60,6 +60,21 @@ static void format_duration(char *buffer, size_t size, double milliseconds)
     }
 }
 
+static void format_processing_rate(
+    char *buffer,
+    size_t size,
+    size_t processed,
+    double milliseconds)
+{
+    if (milliseconds <= 0.0)
+    {
+        snprintf(buffer, size, "N/A");
+        return;
+    }
+    snprintf(buffer, size, "%.4g elem/s",
+             (double)processed * 1000.0 / milliseconds);
+}
+
 static void format_factor(char *buffer, size_t size, double value)
 {
     unsigned long long scaled;
@@ -696,10 +711,12 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
                             values, sizes[size_index], values[sizes[size_index] - 1],
                             &preparation_metrics);
                     }
+                    comparison_progress_active = 0;
                     QueryPerformanceCounter(&start);
                     algorithms[algorithm_index]->algorithm(
                         values, sizes[size_index], values[sizes[size_index] - 1], &metrics);
                     metrics.milliseconds = elapsed_milliseconds(start);
+                    comparison_progress_active = 1;
                     comparison_progress_completed++;
                     lesson11_algorithm_progress("Algoritmo concluído.", 1, 1);
                     times[algorithm_index][size_index] = metrics.milliseconds;
@@ -819,6 +836,33 @@ static unsigned long long theoretical_comparisons(const Lesson11AlgorithmInfo *i
             add_line(lines, &line_count, "x teórico: crescimento previsto pela fórmula do algoritmo.", LIGHTBLUE);
             add_line(lines, &line_count, "prát./teór.: aderência do crescimento observado ao previsto.", LIGHTBLUE);
             add_line(lines, &line_count, "~ indica projeção teórica para custo quadrático em n = 100.000.", YELLOW);
+            add_line(lines, &line_count, "", WHITE);
+            add_line(lines, &line_count, "VELOCIDADE DAS ORDENAÇÕES (elementos por segundo)", BLUE);
+            for (algorithm_index = 2; algorithm_index < 9; algorithm_index++)
+            {
+                add_line(lines, &line_count, algorithms[algorithm_index]->info.name,
+                         algorithm_index % 3 == 0 ? RED : algorithm_index % 3 == 1 ? BLUE : YELLOW);
+                for (size_index = 0; size_index < 4; size_index++)
+                {
+                    char speed[32];
+
+                    if (!available[size_index]) continue;
+                    format_processing_rate(
+                        speed,
+                        sizeof(speed),
+                        sizes[size_index],
+                        times[algorithm_index][size_index]);
+                    snprintf(
+                        text,
+                        sizeof(text),
+                        "%s%lu: %s",
+                        projected[algorithm_index][size_index] ? "~" : "",
+                        (unsigned long)sizes[size_index],
+                        speed);
+                    add_line(lines, &line_count, text,
+                             size_index % 2 == 0 ? LIGHTGREEN : WHITE);
+                }
+            }
             show_comparison_lines(lines, line_count);
         }
 void lesson11_run_algorithm(
@@ -831,6 +875,7 @@ void lesson11_run_algorithm(
     char text[128];
     char duration[32];
     char theoretical_duration[32];
+    char processing_rate[32];
     double times[3] = { 0.0, 0.0, 0.0 };
     unsigned long long practical_comparisons[3] = { 0, 0, 0 };
     unsigned long long practical_movements[3] = { 0, 0, 0 };
@@ -905,13 +950,10 @@ void lesson11_run_algorithm(
         free(values);
     }
 
-    add_line(lines, &line_count, " n        t. prático   t. teórico   prát./teoria", YELLOW);
+    add_line(lines, &line_count, " n      t. prático   t. teórico   velocidade", YELLOW);
     for (i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++)
     {
         double estimated_time = 0.0;
-        double practical_growth = 0.0;
-        double theoretical_growth = 0.0;
-        double practical_theory_ratio = 0.0;
 
         if (!available[i]) continue;
         if (available[0] && theoretical_operations[0] > 0)
@@ -919,13 +961,13 @@ void lesson11_run_algorithm(
             estimated_time = times[0] *
                 (double)theoretical_operations[i] /
                 (double)theoretical_operations[0];
-            practical_growth = times[0] > 0.0 ? times[i] / times[0] : 0.0;
-            theoretical_growth = (double)theoretical_operations[i] /
-                (double)theoretical_operations[0];
-            practical_theory_ratio = theoretical_growth > 0.0 ?
-                practical_growth / theoretical_growth : 0.0;
         }
         format_duration(duration, sizeof(duration), times[i]);
+        format_processing_rate(
+            processing_rate,
+            sizeof(processing_rate),
+            sizes[i],
+            times[i]);
         if (estimated_time > 0.0)
         {
             format_duration(theoretical_duration, sizeof(theoretical_duration), estimated_time);
@@ -937,11 +979,11 @@ void lesson11_run_algorithm(
         snprintf(
             text,
             sizeof(text),
-            "%5lu %12s %12s %13.2fx",
+            "%5lu %12s %12s %18s",
             (unsigned long)sizes[i],
             duration,
             theoretical_duration,
-            practical_theory_ratio
+            processing_rate
         );
         add_line(lines, &line_count, text, LIGHTGREEN);
     }
@@ -967,7 +1009,7 @@ void lesson11_run_algorithm(
             add_line(lines, &line_count, text, WHITE);
         }
     }
-    else
+    else if (info->operation_label != NULL)
     {
         add_line(lines, &line_count, "Operações realizadas:", WHITE);
         snprintf(text, sizeof(text), " n       %-13s movimentações",
@@ -981,6 +1023,12 @@ void lesson11_run_algorithm(
                      practical_movements[i]);
             add_line(lines, &line_count, text, WHITE);
         }
+    }
+    else
+    {
+        add_line(lines, &line_count,
+                 "Contagem de comparações/movimentações omitida para Radix Sort.",
+                 LIGHTBLUE);
     }
     refresh_lines(lines, line_count, 0);
     waitEsc();

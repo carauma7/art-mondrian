@@ -28,6 +28,7 @@
 #include "problems/lesson11/quick-sort.h"
 #include "problems/lesson11/radix-sort.h"
 #include "problems/lesson11/heap-sort.h"
+#include "problems/lesson11/search-benchmark.h"
 #include "eastereggs/devcalc/devcalc.h"
 #include "eastereggs/cobra/cobra.h"
 
@@ -79,6 +80,7 @@ void initialize_menu_items(void)
     menu_add_item("         ", "· Radix Sort ························", "", radix_sort);
     menu_add_item("         ", "· Heap Sort ·························", "", heap_sort);
     menu_add_item("         ", "· Comparativo ······················", "", problem_110_compare);
+    menu_add_item("         ", "· Comparativo de buscas (10.000) ···", "", lesson11_search_benchmark);
     menu_add_item("         ", "···································",       "",          NULL);
     menu_add_item("         ", "· Surpresa: Calculadora de Derivadas", "", devcalcRun);
     menu_add_item("         ", "· Surpresa: Jogo da Cobrinha", "", run_cobra);

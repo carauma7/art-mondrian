@@ -16,7 +16,7 @@ SOURCES = graphics.c utils.c sound.c eastereggs/cobra/cobra.c \
 	problems/lesson11/selection-sort.c problems/lesson11/insertion-sort.c \
 	problems/lesson11/merge-sort.c problems/lesson11/quick-sort.c \
 	problems/lesson11/radix-sort.c \
-	problems/lesson11/heap-sort.c main.c
+	problems/lesson11/heap-sort.c problems/lesson11/search-benchmark.c main.c
 OBJECTS = $(SOURCES:.c=.o)
 TARGET = main.exe
 

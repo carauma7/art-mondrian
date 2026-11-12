@@ -46,6 +46,7 @@ O programa é navegável pelo teclado:
 O projeto oferece exercícios e ferramentas, incluindo:
 
 - problemas de algoritmos e estruturas
+- Aula 11: comparação do tempo e da velocidade das ordenações e de 10.000 buscas sequenciais/binárias
 - calculadora de derivadas (`devcalc`)
 - jogo da cobrinha (`cobra`)
 

@@ -18,7 +18,11 @@ static void prepare_binary_search(int *values, size_t count, int target, Lesson1
     lesson11_algorithm_progress("Preparando Busca Binária", 1, 1);
 }
 
-static void run_binary_search(int *values, size_t count, int target, Lesson11Metrics *metrics)
+static int find_binary(
+    const int *values,
+    size_t count,
+    int target,
+    Lesson11Metrics *metrics)
 {
     size_t left = 0;
     size_t right = count;
@@ -26,16 +30,29 @@ static void run_binary_search(int *values, size_t count, int target, Lesson11Met
     while (left < right)
     {
         size_t middle = left + (right - left) / 2;
-        metrics->comparisons++;
-        lesson11_algorithm_progress("Busca Binária", count - (right - left), count);
+        if (metrics != NULL)
+        {
+            metrics->comparisons++;
+            lesson11_algorithm_progress("Busca Binária", count - (right - left), count);
+        }
         if (values[middle] == target)
         {
-            metrics->found = 1;
-            return;
+            return 1;
         }
         if (values[middle] < target) left = middle + 1;
         else right = middle;
     }
+    return 0;
+}
+
+int binary_search_contains(const int *values, size_t count, int target)
+{
+    return find_binary(values, count, target, NULL);
+}
+
+static void run_binary_search(int *values, size_t count, int target, Lesson11Metrics *metrics)
+{
+    metrics->found = find_binary(values, count, target, metrics);
 }
 
 static const Lesson11AlgorithmInfo binary_search_info = {

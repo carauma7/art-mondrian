@@ -12,6 +12,7 @@ static void run_radix_sort(int *values, size_t count, int target, Lesson11Metric
     size_t total = count * 5;
 
     (void)target;
+    (void)metrics;
     output = (int *)malloc(count * sizeof(*output));
     if (output == NULL) return;
     for (i = 0; i < count; i++)
@@ -24,7 +25,6 @@ static void run_radix_sort(int *values, size_t count, int target, Lesson11Metric
         for (i = 0; i < count; i++)
         {
             buckets[(values[i] / exponent) % 10]++;
-            metrics->comparisons++;
             processed++;
             if ((processed & 4095U) == 0) lesson11_algorithm_progress("Radix Sort", processed, total);
         }
@@ -33,12 +33,10 @@ static void run_radix_sort(int *values, size_t count, int target, Lesson11Metric
         {
             int value = values[i - 1];
             output[--buckets[(value / exponent) % 10]] = value;
-            metrics->movements++;
         }
         for (i = 0; i < count; i++)
         {
             values[i] = output[i];
-            metrics->movements++;
         }
     }
     lesson11_algorithm_progress("Radix Sort", total, total);
@@ -48,13 +46,13 @@ static void run_radix_sort(int *values, size_t count, int target, Lesson11Metric
 static const Lesson11AlgorithmInfo radix_sort_info = {
     "Radix Sort", "O(d(n + b)) em todos os casos",
     "d passagens; n elementos; b = 10", "O(n + b)",
-    "radix-sort", "inspeções", 0
+    "radix-sort", NULL, 0
 };
 
 static const Lesson11AlgorithmDefinition radix_sort_definition_data = {
     { "Radix Sort", "O(d(n + b)) em todos os casos",
       "d passagens; n elementos; b = 10", "O(n + b)",
-      "radix-sort", "inspeções", 0 },
+      "radix-sort", NULL, 0 },
     NULL,
     run_radix_sort
 };
