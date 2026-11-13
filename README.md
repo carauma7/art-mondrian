@@ -3,6 +3,8 @@
 Aplicação didática em C para executar exercícios de estruturas de dados,
 algoritmos de busca e ordenação em um menu interativo de terminal.
 
+<img width="761" height="532" alt="repo_menu" src="https://github.com/user-attachments/assets/34dc118d-25f4-489d-8f5c-945327f11380" />
+
 ## Conteúdo
 
 O menu principal reúne:
