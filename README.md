@@ -2,7 +2,7 @@
 
 Projeto em C para estudo de estruturas de dados e lógica de programação, com interface textual em console e elementos visuais inspirados em arte de matriz de cores.
 
-<img width="738" height="521" alt="image" src="https://github.com/user-attachments/assets/ff1d4d5b-336b-43b2-adea-a8467d4cc10a" />
+<img width="761" height="532" alt="repo_menu" src="https://github.com/user-attachments/assets/34dc118d-25f4-489d-8f5c-945327f11380" />
 
 ## O que é?
 
