@@ -1,0 +1,23 @@
+\frametitle{Quick Sort implementado (\texttt {quick-sort.c})}
+\begin{lstlisting}[style=code]
+static void quick_range(int *values, size_t left, size_t right,
+                        Lesson11Metrics *metrics)
+{
+    size_t store = left, i;
+    int pivot;
+    if (right - left < 2) return;          /* caso base */
+    pivot = values[right - 1];             /* pivô = último elemento */
+    for (i = left; i + 1 < right; i++) {
+        metrics->comparisons++;
+        if (values[i] < pivot) {           /* troca i <-> store */
+            int t = values[i]; values[i] = values[store]; values[store] = t;
+            metrics->movements += 3;
+            store++;
+        }
+    }
+    /* troca values[store] <-> pivô (+3 movimentações) */
+    quick_range(values, left, store, metrics);
+    quick_range(values, store + 1, right, metrics);
+}
+\end{lstlisting}
+ {\scriptsize Trecho adaptado (contadores de progresso omitidos): é a partição de Lomuto, em intervalo semiaberto $[left,right)$.}
