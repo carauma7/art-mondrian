@@ -1,58 +1,68 @@
 # ART Mondrian
 
-Projeto em C para estudo de estruturas de dados e lógica de programação, com interface textual em console e elementos visuais inspirados em arte de matriz de cores.
+Aplicação didática em C para executar exercícios de estruturas de dados,
+algoritmos de busca e ordenação em um menu interativo de terminal.
 
-<img width="761" height="532" alt="repo_menu" src="https://github.com/user-attachments/assets/34dc118d-25f4-489d-8f5c-945327f11380" />
+## Conteúdo
 
-## O que é?
+O menu principal reúne:
 
-Este repositório reúne uma série de exercícios e mini-aplicativos em console, organizados por menu, com foco em:
+- exercícios das aulas 01, 02, 03, 04, 05 e 08;
+- pilhas, filas, palíndromos, balanceamento e problema de Josephus;
+- listas simplesmente encadeadas e exercícios relacionados;
+- heap;
+- buscas sequencial e binária;
+- bubble sort, selection sort, insertion sort, merge sort, quick sort,
+  radix sort e heap sort;
+- comparativos de ordenação e de buscas com 10.000 elementos;
+- geração de arquivos para o trabalho da aula 11;
+- calculadora de derivadas;
+- jogo da cobrinha.
 
-- problemas de estrutura de dados
-- manipulação de ASCII e interface textual
-- pequenos jogos/easter eggs
-- ferramentas auxiliares em C
+## Estrutura
 
-## Estrutura principal
+- `main.c`, `graphics.c`, `sound.c` e `utils.c`: aplicação, interface de
+  terminal, áudio e utilidades;
+- `problems/`: exercícios organizados por aula;
+- `eastereggs/`: calculadora de derivadas (`devcalc`) e jogo da cobrinha
+  (`cobra`);
+- `ascii/`: artes usadas nas telas;
+- `audio/`: músicas e efeitos sonoros;
+- `lib/`: arquivos da biblioteca BASS;
+- `presentation-quicksort/`: apresentação sobre quicksort.
 
-- `main.c` e `main.h`: ponto de entrada e configuração do programa
-- `problems/`: problemas selecionáveis no menu principal
-- `eastereggs/`: mini-aplicativos extras, como `cobra` e `devcalc`
-- `graphics.*`, `utils.*`, `sound.*`: base de renderização e utilidades
-- `ascii/`: arte textual usada na interface
-- `lib/`: biblioteca externa do projeto (`bass`)
+## Compilação e execução
 
-## Como executar
+Requisitos:
 
-No ambiente Windows/MinGW, use:
+- Windows;
+- GCC/MinGW;
+- `mingw32-make`.
+
+Na raiz do repositório, execute:
 
 ```bash
 mingw32-make
 main.exe
 ```
 
-O áudio é opcional: se a biblioteca BASS (`bass.dll`) estiver disponível junto
-do executável, na pasta `lib` ou no PATH, os sons serão reproduzidos. Se não
-estiver, o programa inicia e funciona sem áudio.
+O executável gerado é `main.exe`. Para remover os arquivos de compilação:
 
-O programa é navegável pelo teclado:
+```bash
+mingw32-make clean
+```
 
-- setas: navegar no menu
-- Enter: abrir item selecionado
-- Ctrl + X: sair
+O áudio usa a biblioteca BASS e os arquivos disponíveis no repositório.
 
-## Menu principal
+## Controles
 
-O projeto oferece exercícios e ferramentas, incluindo:
+- setas: navegar pelo menu;
+- Enter: selecionar uma opção;
+- Ctrl + X: sair;
+- no jogo da cobrinha, Esc encerra e Espaço dispara.
 
-- problemas de algoritmos e estruturas
-- Aula 11: comparação do tempo e da velocidade das ordenações e de 10.000 buscas sequenciais/binárias
-- calculadora de derivadas (`devcalc`)
-- jogo da cobrinha (`cobra`)
-
-## Observação
-
-É apenas um projeto didático, com foco em registrar algumas implementações em terminal usando C.
+Projeto para fins de estudo e experimentação com C.
 
 ---
+
 2026 (c) J. Caraumã <https://carauma.com>.
