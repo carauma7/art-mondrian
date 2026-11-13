@@ -69,7 +69,7 @@ void initialize_menu_items(void)
     menu_add_item("         ", "· Exercícios · Questão 06 · Coordenadas ·", "",          problem_76);
     menu_add_item("         ", "· Exercícios · Questão 07 · Inverter ·",    "",          problem_77);
     menu_add_item(" Aula 08 ", "· Heap ····························",       " 10/10/26", problem_80);
-    menu_add_item(" Aula 11 ", "· Ordenação e Busca (Trabalho) · Gerar Arquivos ·", " 11/11/2026", problem_110_generate_files);
+    menu_add_item(" Aula 11 ", "· Ordenação e Busca (Trabalho) · Gerar Arquivos ·", " 11/11/26", problem_110_generate_files);
     menu_add_item("         ", "· Busca Sequencial ·················", "", sequential_search);
     menu_add_item("         ", "· Busca Binária ····················", "", binary_search);
     menu_add_item("         ", "· Bubble Sort ······················", "", bubble_sort);
